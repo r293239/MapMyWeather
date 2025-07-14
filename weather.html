@@ -3,209 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WeatherGuessr - MapMyWeather</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <title>Weather Details</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: linear-gradient(to right, #e0f7fa, #80deea);
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #c9d6ff, #e2e2e2);
       margin: 0;
+      padding: 1rem;
       text-align: center;
     }
-    #map {
-      height: 400px;
-      width: 90%;
-      max-width: 900px;
-      margin: 1rem auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+
+    h1 {
+      margin-bottom: 0.2rem;
     }
-    .info-box {
+
+    .current-weather {
       background: white;
-      max-width: 500px;
       margin: 1rem auto;
       padding: 1rem;
-      border-radius: 10px;
+      max-width: 500px;
+      border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
+
+    .forecast {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .forecast-day {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 150px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .forecast-day img {
+      width: 48px;
+      height: 48px;
+    }
+
     button {
+      margin-top: 1.5rem;
       padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
-      margin: 0.5rem 0.3rem;
-      cursor: pointer;
-      font-weight: bold;
+      background-color: #4a90e2;
       color: white;
-      background-color: #00796b;
-      transition: background-color 0.3s ease;
+      font-weight: bold;
+      cursor: pointer;
     }
-    button:hover:not(:disabled) {
-      background-color: #004d40;
+
+    button:hover {
+      background-color: #357ABD;
     }
-    button:disabled {
-      background-color: #9e9e9e;
-      cursor: not-allowed;
+
+    .error {
+      color: red;
+      margin-top: 2rem;
     }
   </style>
 </head>
 <body>
-  <h1>🌍 WeatherGuessr</h1>
-  <p>Guess where this weather is happening. Click on the map to place your guess, then hit Confirm.</p>
+  <h1 id="locationTitle">Weather</h1>
+  <div id="weatherContainer"></div>
+  <div class="forecast" id="forecastContainer"></div>
+  <div class="error" id="errorMsg"></div>
+  <button onclick="window.history.back()">← Back</button>
 
-  <div class="info-box" id="weatherHint">Loading weather...</div>
-  <div id="map"></div>
-
-  <div>
-    <button id="confirmBtn" disabled>Confirm Guess</button>
-    <button id="playAgainBtn" style="display:none;">Play Again</button>
-  </div>
-
-  <div class="info-box" id="resultBox" style="display:none;"></div>
-  <button onclick="location.href='index.html'">← Back to Map</button>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
+    const params = new URLSearchParams(window.location.search);
 
-    let map = L.map("map").setView([20, 0], 2);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: "© OpenStreetMap contributors"
-    }).addTo(map);
+    const city = params.get("city");
+    const lat = params.get("lat");
+    const lon = params.get("lon");
+    let query = "";
 
-    let actualMarker = null;
-    let guessMarker = null;
-    let actualLocation = null;
-    let weatherData = null;
-
-    const weatherHint = document.getElementById("weatherHint");
-    const confirmBtn = document.getElementById("confirmBtn");
-    const playAgainBtn = document.getElementById("playAgainBtn");
-    const resultBox = document.getElementById("resultBox");
-
-    // Utility: Haversine formula to get distance in km
-    function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
+    if (city) {
+      query = city;
+    } else if (lat && lon) {
+      query = `${lat},${lon}`;
     }
 
-    // Generate a random lat/lon anywhere on Earth (excluding poles extremes)
-    function getRandomCoords() {
-      const lat = (Math.random() * 170) - 85; // -85 to +85
-      const lon = (Math.random() * 360) - 180; // -180 to +180
-      return [lat, lon];
+    if (!query) {
+      document.getElementById("errorMsg").textContent = "❌ No city or coordinates provided.";
+      throw new Error("Missing query");
     }
 
-    // Load weather for random location
-    async function loadRandomWeather() {
-      resultBox.style.display = "none";
-      confirmBtn.disabled = true;
-      playAgainBtn.style.display = "none";
-      weatherHint.textContent = "Loading weather...";
+    fetch(`https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${query}&days=3`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to load weather");
+        }
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById("locationTitle").textContent = `🌤️ Weather in ${data.location.name}, ${data.location.country}`;
 
-      if (actualMarker) {
-        map.removeLayer(actualMarker);
-        actualMarker = null;
-      }
-      if (guessMarker) {
-        map.removeLayer(guessMarker);
-        guessMarker = null;
-      }
-
-      actualLocation = getRandomCoords();
-
-      // Center map
-      map.setView(actualLocation, 4);
-
-      // Call weather API by lat,lon (weatherapi.com supports q=lat,lon)
-      try {
-        const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${actualLocation[0]},${actualLocation[1]}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to load weather");
-        weatherData = await res.json();
-
-        // Show weather info but no city name!
-        weatherHint.innerHTML = `
-          <strong>Weather Conditions:</strong><br>
-          ${weatherData.current.condition.text}, ${weatherData.current.temp_c}°C<br>
-          Humidity: ${weatherData.current.humidity}%<br>
-          Wind: ${weatherData.current.wind_kph} km/h
+        const weatherHTML = `
+          <div class="current-weather">
+            <h2>Current</h2>
+            <p><strong>${data.current.condition.text}</strong></p>
+            <p>🌡️ ${data.current.temp_c}°C</p>
+            <p>💧 Humidity: ${data.current.humidity}%</p>
+            <p>🌬️ Wind: ${data.current.wind_kph} km/h</p>
+            <p>🕒 Last updated: ${data.current.last_updated}</p>
+          </div>
         `;
-      } catch(err) {
-        weatherHint.textContent = "Failed to load weather. Try again.";
-      }
-    }
 
-    // When user clicks map, place guess marker & enable confirm button
-    map.on("click", e => {
-      if (resultBox.style.display === "block") return; // no more guessing after confirmed
+        document.getElementById("weatherContainer").innerHTML = weatherHTML;
 
-      if (guessMarker) {
-        guessMarker.setLatLng(e.latlng);
-      } else {
-        guessMarker = L.marker(e.latlng, { draggable: true }).addTo(map);
-        guessMarker.bindPopup("Your guess").openPopup();
-
-        // Allow dragging guess marker to adjust guess
-        guessMarker.on('dragend', () => {
-          confirmBtn.disabled = false;
+        let forecastHTML = "";
+        data.forecast.forecastday.forEach(day => {
+          forecastHTML += `
+            <div class="forecast-day">
+              <h4>${day.date}</h4>
+              <img src="https:${day.day.condition.icon}" alt="${day.day.condition.text}" />
+              <p>${day.day.condition.text}</p>
+              <p>High: ${day.day.maxtemp_c}°C</p>
+              <p>Low: ${day.day.mintemp_c}°C</p>
+            </div>
+          `;
         });
-      }
-      confirmBtn.disabled = false;
-    });
 
-    confirmBtn.addEventListener("click", () => {
-      if (!guessMarker) return;
-
-      confirmBtn.disabled = true;
-
-      const guessLat = guessMarker.getLatLng().lat;
-      const guessLon = guessMarker.getLatLng().lng;
-      const actualLat = weatherData.location.lat;
-      const actualLon = weatherData.location.lon;
-
-      const dist = Math.round(getDistance(guessLat, guessLon, actualLat, actualLon));
-
-      resultBox.style.display = "block";
-      resultBox.innerHTML = `
-        <h3>🏁 Result</h3>
-        <p>You were <strong>${dist} km</strong> away.</p>
-        <p>The actual location was <strong>${weatherData.location.name}, ${weatherData.location.country}</strong>.</p>
-      `;
-
-      // Show actual location marker
-      actualMarker = L.marker([actualLat, actualLon], {icon: L.icon({
-        iconUrl: 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2.png',
-        iconSize: [27, 43],
-        iconAnchor: [13, 41],
-        popupAnchor: [0, -35]
-      })}).addTo(map);
-      actualMarker.bindPopup(`📍 ${weatherData.location.name}`).openPopup();
-
-      // Zoom out to show both points nicely
-      const group = new L.featureGroup([actualMarker, guessMarker]);
-      map.fitBounds(group.getBounds().pad(0.5));
-
-      playAgainBtn.style.display = "inline-block";
-    });
-
-    playAgainBtn.addEventListener("click", () => {
-      loadRandomWeather();
-    });
-
-    // Start first round
-    loadRandomWeather();
+        document.getElementById("forecastContainer").innerHTML = forecastHTML;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("errorMsg").textContent = "❌ Failed to load weather. Please try again.";
+      });
   </script>
 </body>
 </html>
