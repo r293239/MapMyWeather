@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherGuessr - MapMyWeather</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #80deea);
+      text-align: center;
+    }
+    #map {
+      height: 400px;
+      margin: 1rem auto;
+      width: 90%;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .info-box {
+      background: white;
+      margin: 1rem auto;
+      padding: 1rem;
+      max-width: 500px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background: #004d40;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌍 WeatherGuessr</h1>
+  <p>Guess where this weather is happening. Click on the map!</p>
+  <div class="info-box" id="weatherHint">Loading weather...</div>
+  <div id="map"></div>
+  <div class="info-box" id="resultBox" style="display:none;"></div>
+  <button onclick="location.href='index.html'">← Back to Map</button>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
+
+    const cities = [
+      { name: "New York", coords: [40.7128, -74.0060] },
+      { name: "London", coords: [51.5074, -0.1278] },
+      { name: "Tokyo", coords: [35.6762, 139.6503] },
+      { name: "Sydney", coords: [-33.8688, 151.2093] },
+      { name: "Singapore", coords: [1.3521, 103.8198] },
+      { name: "Paris", coords: [48.8566, 2.3522] },
+      { name: "Dubai", coords: [25.276987, 55.296249] },
+      { name: "Toronto", coords: [43.65107, -79.347015] },
+      { name: "Rio de Janeiro", coords: [-22.9068, -43.1729] },
+      { name: "Cape Town", coords: [-33.9249, 18.4241] },
+      { name: "Moscow", coords: [55.7558, 37.6173] },
+      { name: "Istanbul", coords: [41.0082, 28.9784] }
+    ];
+
+    const randomCity = cities[Math.floor(Math.random() * cities.length)];
+    let map = L.map("map").setView([20, 0], 2);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(map);
+
+    const weatherBox = document.getElementById("weatherHint");
+    const resultBox = document.getElementById("resultBox");
+
+    fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${randomCity.name}`)
+      .then(res => res.json())
+      .then(data => {
+        weatherBox.innerHTML = `
+          <strong>Weather Conditions:</strong><br>
+          ${data.current.condition.text}, ${data.current.temp_c}°C<br>
+          Humidity: ${data.current.humidity}%<br>
+          Wind: ${data.current.wind_kph} km/h
+        `;
+      });
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    map.on("click", function (e) {
+      const guessLat = e.latlng.lat;
+      const guessLon = e.latlng.lng;
+      const actualLat = randomCity.coords[0];
+      const actualLon = randomCity.coords[1];
+
+      const dist = Math.round(getDistance(guessLat, guessLon, actualLat, actualLon));
+
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+        <h3>🏁 Result</h3>
+        <p>You were <strong>${dist} km</strong> away.</p>
+        <p>The actual location was <strong>${randomCity.name}</strong>.</p>
+      `;
+
+      L.marker([actualLat, actualLon]).addTo(map).bindPopup(`📍 ${randomCity.name}`).openPopup();
+      map.setView([actualLat, actualLon], 4);
+    });
+  </script>
+</body>
+</html>
