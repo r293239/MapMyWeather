@@ -134,6 +134,28 @@
       color: #444;
     }
 
+    #feedbackBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #4a90e2;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+      z-index: 9999;
+      text-decoration: none;
+    }
+
+    #feedbackBtn:hover {
+      background-color: #357ABD;
+    }
+
     @media (max-width: 600px) {
       #weatherContainer {
         flex-direction: column;
@@ -171,6 +193,11 @@
   © 2025 MapMyWeather | Built by Reuben | Data from WeatherAPI.com
 </footer>
 
+<!-- Feedback Button -->
+<a id="feedbackBtn" href="https://docs.google.com/forms/d/1Sr-6EWcdBa7Hst9nyJLvTz7oU-eGozoYBpZTMKj7_mU/viewform" target="_blank">
+  Help Us Improve
+</a>
+
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -190,33 +217,27 @@
     { name: "Cape Town", coords: [-33.9249, 18.4241] }
   ];
 
-  // Initialize map
   const map = L.map("map").setView([20, 0], 2);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Add markers and fetch weather
   cities.forEach(city => {
     const marker = L.marker(city.coords).addTo(map);
     marker.bindPopup(city.name);
     fetchWeather(city.name);
   });
 
-  // Fetch and display weather
   function fetchWeather(cityName) {
     const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(cityName)}`;
-
     fetch(url)
       .then(response => {
         if (!response.ok) throw new Error("Weather not found");
         return response.json();
       })
       .then(data => displayWeather(data))
-      .catch(err => {
-        console.error(`Error loading weather for ${cityName}:`, err);
-      });
+      .catch(err => console.error(`Error loading weather for ${cityName}:`, err));
   }
 
   function displayWeather(data) {
@@ -233,7 +254,6 @@
     container.appendChild(div);
   }
 
-  // Handle search form
   document.getElementById("searchForm").addEventListener("submit", e => {
     e.preventDefault();
     const city = document.getElementById("searchInput").value.trim();
