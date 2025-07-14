@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MapMyWeather - Weather Details</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: rgba(255 255 255 / 0.7);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  main {
+    flex: 1;
+    padding: 1rem 2rem;
+    max-width: 600px;
+    margin: 1rem auto 2rem;
+    background: rgba(255 255 255 / 0.85);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  .city-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .current-weather {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .temp {
+    font-size: 4rem;
+    font-weight: 700;
+  }
+
+  .condition {
+    font-style: italic;
+    font-size: 1.3rem;
+    color: #555;
+  }
+
+  .details {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .forecast {
+    margin-top: 1rem;
+  }
+
+  .forecast-day {
+    border-top: 1px solid #ccc;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+
+  .forecast-day:first-child {
+    border-top: none;
+  }
+
+  a.back-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #4a90e2;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  a.back-link:hover {
+    text-decoration: underline;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #444;
+  }
+
+  @media (max-width: 600px) {
+    main {
+      margin: 1rem;
+      padding: 1rem;
+      width: auto;
+    }
+    .temp {
+      font-size: 3rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MapMyWeather</h1>
+</header>
+
+<main>
+  <div id="weatherContent">
+    Loading weather...
+  </div>
+  <a href="index.html" class="back-link">&larr; Back to Home</a>
+</main>
+
+<footer>© 2025 MapMyWeather. Data from WeatherAPI.com</footer>
+
+<script>
+  const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
+
+  // Helper: get URL param
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  const city = getQueryParam("city");
+
+  const contentDiv = document.getElementById("weatherContent");
+
+  if (!city) {
+    contentDiv.innerHTML = "<p>Error: No city specified in URL.</p>";
+  } else {
+    fetchWeather(city);
+  }
+
+  function fetchWeather(city) {
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city)}&days=3&aqi=no&alerts=no`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("City not found");
+        return res.json();
+      })
+      .then(data => {
+        displayWeather(data);
+      })
+      .catch(err => {
+        contentDiv.innerHTML = `<p>Error fetching weather for "${city}": ${err.message}</p>`;
+      });
+  }
+
+  function displayWeather(data) {
+    const loc = data.location;
+    const current = data.current;
+    const forecastDays = data.forecast.forecastday;
+
+    let html = `
+      <div class="city-name">${loc.name}, ${loc.country}</div>
+
+      <div class="current-weather">
+        <div class="temp">${Math.round(current.temp_c)}°C</div>
+        <div>
+          <div class="condition">${current.condition.text}</div>
+          <div class="details">
+            Humidity: ${current.humidity}%<br/>
+            Wind: ${Math.round(current.wind_kph)} km/h<br/>
+            Last updated: ${current.last_updated}
+          </div>
+        </div>
+      </div>
+
+      <div class="forecast">
+        <h3>3-Day Forecast</h3>
+    `;
+
+    forecastDays.forEach(day => {
+      html += `
+        <div class="forecast-day">
+          <div>${day.date}</div>
+          <div>${day.day.condition.text}</div>
+          <div>Max: ${Math.round(day.day.maxtemp_c)}°C</div>
+          <div>Min: ${Math.round(day.day.mintemp_c)}°C</div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+
+    contentDiv.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
 
