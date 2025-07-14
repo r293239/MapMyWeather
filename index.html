@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MapMyWeather - Your world’s weather mapped</title>
+<title>MapMyWeather - Interactive World Weather Map & Forecast</title>
+
+<meta name="description" content="Explore live weather worldwide with MapMyWeather. Interactive map, city forecasts, and free weather data powered by WeatherAPI.com." />
+<meta name="keywords" content="weather, world weather map, weather forecast, free weather, city weather, weather app, interactive map" />
+<meta name="author" content="Reuben" />
+<meta name="robots" content="index, follow" />
 
 <!-- Leaflet CSS -->
 <link
@@ -19,42 +24,51 @@
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
     color: #222;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
   }
 
   header {
-    background: rgba(255 255 255 / 0.7);
+    background: rgba(255 255 255 / 0.8);
     padding: 1rem 2rem;
-    text-align: center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
   }
 
   header h1 {
-    margin: 0;
+    margin: 0 0 0.25rem 0;
     font-weight: 700;
   }
 
+  header p {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #333;
+  }
+
   #searchForm {
-    margin-top: 0.8rem;
+    margin: 0 auto 1.5rem auto;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
   }
 
   #searchInput {
+    flex-grow: 1;
     padding: 0.6rem 1rem;
-    width: 240px;
     border: none;
-    border-radius: 24px;
+    border-radius: 24px 0 0 24px;
     font-size: 1rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    outline-offset: 2px;
   }
 
   #searchButton {
     padding: 0.6rem 1.2rem;
-    margin-left: 0.5rem;
     background-color: #4a90e2;
     border: none;
-    border-radius: 24px;
+    border-radius: 0 24px 24px 0;
     color: white;
     font-weight: bold;
     cursor: pointer;
@@ -66,15 +80,22 @@
     background-color: #357ABD;
   }
 
+  main {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    padding: 0 1rem;
+    width: 100%;
+  }
+
   #map {
     height: 450px;
-    margin: 1rem 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
 
   #weatherContainer {
-    margin: 1rem 2rem 2rem;
+    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
@@ -82,7 +103,7 @@
   }
 
   .city-weather {
-    background: rgba(255 255 255 / 0.85);
+    background: rgba(255 255 255 / 0.9);
     border-radius: 12px;
     padding: 1rem 1.5rem;
     width: 180px;
@@ -112,11 +133,33 @@
     margin-bottom: 0.6rem;
   }
 
+  section#about {
+    background: rgba(255 255 255 / 0.8);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 2rem auto;
+    max-width: 700px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  section#about h2 {
+    margin-top: 0;
+    font-weight: 700;
+    color: #222;
+  }
+
+  section#about p {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.5;
+  }
+
   footer {
     text-align: center;
     padding: 1rem;
     font-size: 0.9rem;
     color: #444;
+    background: rgba(255 255 255 / 0.7);
   }
 
   @media (max-width: 600px) {
@@ -128,8 +171,16 @@
       width: 90%;
     }
     #map {
-      margin: 1rem;
       height: 350px;
+    }
+    #searchForm {
+      flex-direction: column;
+      max-width: 300px;
+    }
+    #searchInput, #searchButton {
+      border-radius: 24px;
+      width: 100%;
+      margin: 0.3rem 0;
     }
   }
 </style>
@@ -138,23 +189,36 @@
 
 <header>
   <h1>MapMyWeather</h1>
-  <form id="searchForm" autocomplete="off">
+  <p>Your interactive world weather map. Search cities and get free real-time weather forecasts powered by WeatherAPI.com.</p>
+  <form id="searchForm" autocomplete="off" role="search" aria-label="Search weather by city">
     <input
-      type="text"
+      type="search"
       id="searchInput"
+      name="city"
       placeholder="Enter city name (e.g. Tokyo)"
       required
+      aria-required="true"
       aria-label="Search city"
     />
-    <button type="submit" id="searchButton">Search</button>
+    <button type="submit" id="searchButton" aria-label="Search weather">Search</button>
   </form>
 </header>
 
-<div id="map"></div>
+<main>
+  <div id="map" aria-label="Interactive world map showing cities"></div>
 
-<div id="weatherContainer">
-  <!-- Weather panels for default cities will appear here -->
-</div>
+  <section id="weatherContainer" aria-live="polite" aria-relevant="additions">
+    <!-- Weather panels for default cities will be inserted here -->
+  </section>
+
+  <section id="about">
+    <h2>About MapMyWeather</h2>
+    <p>
+      MapMyWeather lets you explore current weather conditions worldwide on an interactive map. Click on city markers to view live weather updates or search any city to get detailed forecasts.
+      All weather data is powered by WeatherAPI.com, providing accurate and up-to-date information for your convenience.
+    </p>
+  </section>
+</main>
 
 <footer>© 2025 MapMyWeather. Data from WeatherAPI.com</footer>
 
@@ -181,14 +245,17 @@
     { name: "Dubai", coords: [25.2048, 55.2708] }
   ];
 
+  // Initialize map
   const map = L.map("map").setView([20, 0], 2);
 
+  // OpenStreetMap tiles
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution:
       '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
+  // Add markers and fetch weather
   cities.forEach(city => {
     const marker = L.marker(city.coords).addTo(map);
     marker.bindPopup(`<b>${city.name}</b>`);
@@ -196,6 +263,7 @@
     fetchWeather(city.name);
   });
 
+  // Fetch weather for city
   function fetchWeather(city) {
     const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city)}`;
 
@@ -212,6 +280,7 @@
       });
   }
 
+  // Display weather panels
   function displayCityWeather(data) {
     const container = document.getElementById("weatherContainer");
 
@@ -229,7 +298,8 @@
     container.appendChild(cityDiv);
   }
 
-  document.getElementById("searchForm").addEventListener("submit", (e) => {
+  // Search form submit
+  document.getElementById("searchForm").addEventListener("submit", e => {
     e.preventDefault();
     const city = document.getElementById("searchInput").value.trim();
     if (city) {
@@ -240,4 +310,3 @@
 
 </body>
 </html>
-
