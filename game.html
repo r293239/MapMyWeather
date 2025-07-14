@@ -15,6 +15,9 @@
       margin: 0;
       text-align: center;
     }
+    h1 {
+      margin-top: 0.8rem;
+    }
     #map {
       height: 400px;
       width: 90%;
@@ -30,6 +33,22 @@
       padding: 1rem;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .leaderboard {
+      margin: 1rem auto;
+      max-width: 500px;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    .leaderboard h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .leaderboard ol {
+      padding-left: 1.2rem;
     }
     button {
       padding: 0.6rem 1.2rem;
@@ -65,12 +84,17 @@
   </div>
 
   <div class="info-box" id="resultBox" style="display:none;"></div>
+
+  <div class="leaderboard" id="leaderboardBox">
+    <h3>🏆 Top 10 Closest Guesses</h3>
+    <ol id="leaderboardList"></ol>
+  </div>
+
   <button onclick="location.href='index.html'">← Back to Map</button>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
-
     let map = L.map("map").setView([20, 0], 2);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
@@ -81,86 +105,80 @@
     let guessMarker = null;
     let actualLocation = null;
     let weatherData = null;
+    let previousLocation = null;
 
     const weatherHint = document.getElementById("weatherHint");
     const confirmBtn = document.getElementById("confirmBtn");
     const playAgainBtn = document.getElementById("playAgainBtn");
     const resultBox = document.getElementById("resultBox");
+    const leaderboardBox = document.getElementById("leaderboardList");
 
-    // Utility: Haversine formula to get distance in km
     function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const R = 6371e3; // meters
+      const toRad = x => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
-    // Generate a random lat/lon anywhere on Earth (excluding poles extremes)
     function getRandomCoords() {
-      const lat = (Math.random() * 170) - 85; // -85 to +85
-      const lon = (Math.random() * 360) - 180; // -180 to +180
+      const lat = Math.random() * 170 - 85;
+      const lon = Math.random() * 360 - 180;
       return [lat, lon];
     }
 
-    // Load weather for random location
     async function loadRandomWeather() {
       resultBox.style.display = "none";
       confirmBtn.disabled = true;
       playAgainBtn.style.display = "none";
       weatherHint.textContent = "Loading weather...";
 
-      if (actualMarker) {
-        map.removeLayer(actualMarker);
-        actualMarker = null;
-      }
-      if (guessMarker) {
-        map.removeLayer(guessMarker);
-        guessMarker = null;
-      }
+      if (actualMarker) map.removeLayer(actualMarker);
+      if (guessMarker) map.removeLayer(guessMarker);
 
-      actualLocation = getRandomCoords();
+      let tries = 0;
+      do {
+        actualLocation = getRandomCoords();
+        tries++;
+      } while (
+        previousLocation &&
+        getDistance(previousLocation[0], previousLocation[1], actualLocation[0], actualLocation[1]) < 5000000 &&
+        tries < 10
+      );
+      previousLocation = actualLocation;
 
-      // Center map
-      map.setView(actualLocation, 4);
+      map.setView([20, 0], 2); // zoomed out world view
 
-      // Call weather API by lat,lon (weatherapi.com supports q=lat,lon)
       try {
         const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${actualLocation[0]},${actualLocation[1]}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to load weather");
         weatherData = await res.json();
 
-        // Show weather info but no city name!
         weatherHint.innerHTML = `
           <strong>Weather Conditions:</strong><br>
           ${weatherData.current.condition.text}, ${weatherData.current.temp_c}°C<br>
           Humidity: ${weatherData.current.humidity}%<br>
           Wind: ${weatherData.current.wind_kph} km/h
         `;
-      } catch(err) {
-        weatherHint.textContent = "Failed to load weather. Try again.";
+      } catch {
+        weatherHint.textContent = "⚠️ Failed to load weather. Try again.";
       }
     }
 
-    // When user clicks map, place guess marker & enable confirm button
     map.on("click", e => {
-      if (resultBox.style.display === "block") return; // no more guessing after confirmed
+      if (resultBox.style.display === "block") return;
 
       if (guessMarker) {
         guessMarker.setLatLng(e.latlng);
       } else {
         guessMarker = L.marker(e.latlng, { draggable: true }).addTo(map);
-        guessMarker.bindPopup("Your guess").openPopup();
-
-        // Allow dragging guess marker to adjust guess
-        guessMarker.on('dragend', () => {
-          confirmBtn.disabled = false;
-        });
+        guessMarker.bindPopup("Your Guess").openPopup();
+        guessMarker.on("dragend", () => confirmBtn.disabled = false);
       }
       confirmBtn.disabled = false;
     });
@@ -169,43 +187,74 @@
       if (!guessMarker) return;
 
       confirmBtn.disabled = true;
+      const g = guessMarker.getLatLng();
+      const a = [weatherData.location.lat, weatherData.location.lon];
+      const distance = getDistance(g.lat, g.lng, a[0], a[1]);
 
-      const guessLat = guessMarker.getLatLng().lat;
-      const guessLon = guessMarker.getLatLng().lng;
-      const actualLat = weatherData.location.lat;
-      const actualLon = weatherData.location.lon;
-
-      const dist = Math.round(getDistance(guessLat, guessLon, actualLat, actualLon));
+      let distanceStr = distance >= 10000
+        ? `${Math.round(distance / 1000)} km`
+        : `${Math.round(distance)} meters`;
 
       resultBox.style.display = "block";
       resultBox.innerHTML = `
         <h3>🏁 Result</h3>
-        <p>You were <strong>${dist} km</strong> away.</p>
+        <p>You were <strong>${distanceStr}</strong> away.</p>
         <p>The actual location was <strong>${weatherData.location.name}, ${weatherData.location.country}</strong>.</p>
       `;
 
-      // Show actual location marker
-      actualMarker = L.marker([actualLat, actualLon], {icon: L.icon({
-        iconUrl: 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2.png',
-        iconSize: [27, 43],
-        iconAnchor: [13, 41],
-        popupAnchor: [0, -35]
-      })}).addTo(map);
+      actualMarker = L.marker(a).addTo(map);
       actualMarker.bindPopup(`📍 ${weatherData.location.name}`).openPopup();
-
-      // Zoom out to show both points nicely
       const group = new L.featureGroup([actualMarker, guessMarker]);
       map.fitBounds(group.getBounds().pad(0.5));
-
       playAgainBtn.style.display = "inline-block";
+
+      updateLeaderboard(distance);
     });
 
-    playAgainBtn.addEventListener("click", () => {
-      loadRandomWeather();
-    });
+    playAgainBtn.addEventListener("click", loadRandomWeather);
 
-    // Start first round
+    function updateLeaderboard(newDistance) {
+      let board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+
+      board.push({ name: "", distance: newDistance });
+      board.sort((a, b) => a.distance - b.distance);
+      board = board.slice(0, 10);
+
+      const qualifies = board.some(e => e.name === "");
+      if (qualifies) {
+        const name = prompt("🎉 You're in the top 10! Enter your name:");
+        if (name) {
+          for (let entry of board) {
+            if (entry.name === "") {
+              entry.name = name;
+              break;
+            }
+          }
+        }
+      }
+
+      localStorage.setItem("weatherGuessrLeaderboard", JSON.stringify(board));
+      displayLeaderboard(board);
+    }
+
+    function displayLeaderboard(board = null) {
+      if (!board) {
+        board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+      }
+
+      leaderboardBox.innerHTML = "";
+      for (const entry of board) {
+        const li = document.createElement("li");
+        const formatted = entry.distance >= 10000
+          ? `${Math.round(entry.distance / 1000)} km`
+          : `${Math.round(entry.distance)} m`;
+        li.textContent = `${entry.name || "Anonymous"} — ${formatted}`;
+        leaderboardBox.appendChild(li);
+      }
+    }
+
     loadRandomWeather();
+    displayLeaderboard();
   </script>
 </body>
 </html>
