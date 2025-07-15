@@ -195,12 +195,25 @@
     });
 
     confirmBtn.addEventListener("click", () => {
-      if (!guessMarker) return;
+      console.log("Confirm button clicked!"); // Debug log
+      
+      if (!guessMarker) {
+        console.log("No guess marker found");
+        return;
+      }
+      
+      if (!weatherData) {
+        console.log("No weather data available");
+        return;
+      }
+      
       confirmBtn.disabled = true;
       const g = guessMarker.getLatLng();
       const a = [weatherData.location.lat, weatherData.location.lon];
       const distance = getDistance(g.lat, g.lng, a[0], a[1]);
       const distanceStr = distance >= 10000 ? `${Math.round(distance / 1000)} km` : `${Math.round(distance)} meters`;
+
+      console.log(`Distance calculated: ${distanceStr}`);
 
       resultBox.style.display = "block";
       resultBox.innerHTML = `
