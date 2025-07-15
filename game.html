@@ -194,42 +194,53 @@
       confirmBtn.disabled = false;
     });
 
-    confirmBtn.addEventListener("click", () => {
+    function handleConfirmGuess() {
       console.log("Confirm button clicked!"); // Debug log
       
       if (!guessMarker) {
         console.log("No guess marker found");
+        alert("Please click on the map to place your guess first!");
         return;
       }
       
       if (!weatherData) {
         console.log("No weather data available");
+        alert("Weather data not loaded. Please wait and try again.");
         return;
       }
       
-      confirmBtn.disabled = true;
-      const g = guessMarker.getLatLng();
-      const a = [weatherData.location.lat, weatherData.location.lon];
-      const distance = getDistance(g.lat, g.lng, a[0], a[1]);
-      const distanceStr = distance >= 10000 ? `${Math.round(distance / 1000)} km` : `${Math.round(distance)} meters`;
+      try {
+        confirmBtn.disabled = true;
+        const g = guessMarker.getLatLng();
+        const a = [weatherData.location.lat, weatherData.location.lon];
+        const distance = getDistance(g.lat, g.lng, a[0], a[1]);
+        const distanceStr = distance >= 10000 ? `${Math.round(distance / 1000)} km` : `${Math.round(distance)} meters`;
 
-      console.log(`Distance calculated: ${distanceStr}`);
+        console.log(`Distance calculated: ${distanceStr}`);
 
-      resultBox.style.display = "block";
-      resultBox.innerHTML = `
-        <h3>🏁 Result</h3>
-        <p>You were <strong>${distanceStr}</strong> away.</p>
-        <p>The actual location was <strong>${weatherData.location.name}, ${weatherData.location.country}</strong>.</p>
-      `;
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `
+          <h3>🏁 Result</h3>
+          <p>You were <strong>${distanceStr}</strong> away.</p>
+          <p>The actual location was <strong>${weatherData.location.name}, ${weatherData.location.country}</strong>.</p>
+        `;
 
-      actualMarker = L.marker(a).addTo(map);
-      actualMarker.bindPopup(`📍 ${weatherData.location.name}`).openPopup();
-      const group = new L.featureGroup([actualMarker, guessMarker]);
-      map.fitBounds(group.getBounds().pad(0.5));
-      playAgainBtn.style.display = "inline-block";
+        actualMarker = L.marker(a).addTo(map);
+        actualMarker.bindPopup(`📍 ${weatherData.location.name}`).openPopup();
+        const group = new L.featureGroup([actualMarker, guessMarker]);
+        map.fitBounds(group.getBounds().pad(0.5));
+        playAgainBtn.style.display = "inline-block";
 
-      updateLeaderboard(distance);
-    });
+        updateLeaderboard(distance);
+      } catch (error) {
+        console.error("Error in confirm guess:", error);
+        alert("An error occurred. Please try again.");
+        confirmBtn.disabled = false;
+      }
+    }
+
+    confirmBtn.addEventListener("click", handleConfirmGuess);
+    confirmBtn.onclick = handleConfirmGuess; // Backup event handler
 
     playAgainBtn.addEventListener("click", loadRandomWeather);
 
