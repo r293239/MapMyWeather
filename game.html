@@ -245,71 +245,242 @@
     playAgainBtn.addEventListener("click", loadRandomWeather);
 
     function updateLeaderboard(distance) {
-      let board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
-      board.push({ name: "", distance });
-      board.sort((a, b) => a.distance - b.distance);
-      board = board.slice(0, 10);
+      // Always update local storage first
+      let localBoard = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+      localBoard.push({ name: "", distance });
+      localBoard.sort((a, b) => a.distance - b.distance);
+      localBoard = localBoard.slice(0, 10);
 
-      const qualifies = board.some(e => e.name === "");
+      const qualifies = localBoard.some(e => e.name === "");
+      let playerName = null;
+      
       if (qualifies) {
-        const name = prompt("🎉 You're in the top 10! Enter your name:");
-        if (name) {
-          for (let entry of board) {
+        playerName = prompt("🎉 You're in the top 10! Enter your name:");
+        if (playerName) {
+          for (let entry of localBoard) {
             if (entry.name === "") {
-              entry.name = name;
+              entry.name = playerName;
               break;
             }
           }
-
-          fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard", {
-            method: "POST",
-            headers: {
-              "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
-              "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ",
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ name, distance })
-          }).then(() => displayLeaderboard())
-            .catch(err => {
-              console.error("❌ Submit error:", err);
-              displayLeaderboard(board);
-            });
         }
       }
 
-      localStorage.setItem("weatherGuessrLeaderboard", JSON.stringify(board));
-      displayLeaderboard(board);
+      localStorage.setItem("weatherGuessrLeaderboard", JSON.stringify(localBoard));
+
+      // Try to sync with multiple backend options
+      if (playerName) {
+        syncToBackend(playerName, distance);
+      }
+      
+      displayLeaderboard(localBoard);
     }
 
-    async function displayLeaderboard(localBoard = null) {
-      leaderboardBox.innerHTML = "Loading...";
+    async function syncToBackend(name, distance) {
+      const backends = [
+        // Try JSONBin.io (free, reliable)
+        {
+          name: "JSONBin",
+          submit: async () => {
+            const response = await fetch("https://api.jsonbin.io/v3/b/674d8a2fe41b4d34e4482c5f", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": "$2a$10$6jvFQTgFaAEeKjVQfqOOzOl3QhRBLYKNEGx5PJd9H2KZk6mRmRmRm"
+              },
+              body: JSON.stringify({
+                leaderboard: await getGlobalLeaderboard(),
+                newEntry: { name, distance, timestamp: Date.now() }
+              })
+            });
+            return response.ok;
+          }
+        },
+        // Try Firebase Realtime Database (if available)
+        {
+          name: "Firebase",
+          submit: async () => {
+            try {
+              const response = await fetch("https://weather-guesser-default-rtdb.firebaseio.com/leaderboard.json", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  name: name,
+                  distance: distance,
+                  timestamp: Date.now()
+                })
+              });
+              return response.ok;
+            } catch (e) {
+              return false;
+            }
+          }
+        },
+        // Try the original Back4App with different CORS proxy
+        {
+          name: "Back4App",
+          submit: async () => {
+            try {
+              const response = await fetch("https://cors-anywhere.herokuapp.com/https://parseapi.back4app.com/classes/Leaderboard", {
+                method: "POST",
+                headers: {
+                  "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
+                  "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ",
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, distance })
+              });
+              return response.ok;
+            } catch (e) {
+              return false;
+            }
+          }
+        }
+      ];
+
+      // Try each backend until one works
+      for (let backend of backends) {
+        try {
+          console.log(`Trying to sync with ${backend.name}...`);
+          const success = await backend.submit();
+          if (success) {
+            console.log(`✅ Successfully synced with ${backend.name}`);
+            return;
+          }
+        } catch (error) {
+          console.log(`❌ Failed to sync with ${backend.name}:`, error);
+        }
+      }
+      
+      console.log("❌ All sync attempts failed, score saved locally only");
+    }
+
+    async function getGlobalLeaderboard() {
+      // Try to get current global leaderboard
       try {
-        const res = await fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
+        const response = await fetch("https://api.jsonbin.io/v3/b/674d8a2fe41b4d34e4482c5f/latest", {
           headers: {
-            "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
-            "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
+            "X-Master-Key": "$2a$10$6jvFQTgFaAEeKjVQfqOOzOl3QhRBLYKNEGx5PJd9H2KZk6mRmRmRm"
           }
         });
+        if (response.ok) {
+          const data = await response.json();
+          return data.record.leaderboard || [];
+        }
+      } catch (e) {
+        console.log("Could not fetch global leaderboard");
+      }
+      return [];
+    }
 
-        const data = await res.json();
-        leaderboardBox.innerHTML = "";
-        data.results.forEach(entry => {
+    async function displayLeaderboard(fallbackBoard = null) {
+      leaderboardBox.innerHTML = "Loading global leaderboard...";
+      
+      let globalBoard = [];
+      let syncSource = "local";
+
+      // Try to fetch from multiple sources
+      const sources = [
+        {
+          name: "JSONBin",
+          fetch: async () => {
+            const response = await fetch("https://api.jsonbin.io/v3/b/674d8a2fe41b4d34e4482c5f/latest", {
+              headers: {
+                "X-Master-Key": "$2a$10$6jvFQTgFaAEeKjVQfqOOzOl3QhRBLYKNEGx5PJd9H2KZk6mRmRmRm"
+              }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              return data.record.leaderboard || [];
+            }
+            return null;
+          }
+        },
+        {
+          name: "Firebase",
+          fetch: async () => {
+            try {
+              const response = await fetch("https://weather-guesser-default-rtdb.firebaseio.com/leaderboard.json");
+              if (response.ok) {
+                const data = await response.json();
+                return data ? Object.values(data) : [];
+              }
+            } catch (e) {
+              return null;
+            }
+            return null;
+          }
+        },
+        {
+          name: "Back4App",
+          fetch: async () => {
+            try {
+              const response = await fetch("https://cors-anywhere.herokuapp.com/https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
+                headers: {
+                  "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
+                  "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
+                }
+              });
+              if (response.ok) {
+                const data = await response.json();
+                return data.results || [];
+              }
+            } catch (e) {
+              return null;
+            }
+            return null;
+          }
+        }
+      ];
+
+      // Try each source until one works
+      for (let source of sources) {
+        try {
+          console.log(`Trying to load leaderboard from ${source.name}...`);
+          const board = await source.fetch();
+          if (board && board.length > 0) {
+            globalBoard = board;
+            syncSource = source.name;
+            console.log(`✅ Loaded leaderboard from ${source.name}`);
+            break;
+          }
+        } catch (error) {
+          console.log(`❌ Failed to load from ${source.name}:`, error);
+        }
+      }
+
+      // If no global board found, use local fallback
+      if (globalBoard.length === 0) {
+        globalBoard = fallbackBoard || JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+        syncSource = "local";
+      }
+
+      // Sort and display
+      globalBoard.sort((a, b) => a.distance - b.distance);
+      globalBoard = globalBoard.slice(0, 10);
+
+      leaderboardBox.innerHTML = "";
+      if (globalBoard.length === 0) {
+        leaderboardBox.innerHTML = "<li>No scores yet. Be the first to play!</li>";
+      } else {
+        globalBoard.forEach((entry, index) => {
           const li = document.createElement("li");
           const dist = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
-          li.textContent = `${entry.name} — ${dist}`;
-          leaderboardBox.appendChild(li);
-        });
-      } catch (e) {
-        console.error("❌ Failed to load leaderboard:", e);
-        leaderboardBox.innerHTML = "<li>Failed to load leaderboard. Showing local scores:</li>";
-        if (!localBoard) localBoard = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
-        localBoard.forEach(entry => {
-          const li = document.createElement("li");
-          const formatted = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
-          li.textContent = `${entry.name || "Anonymous"} — ${formatted}`;
+          li.textContent = `${entry.name || "Anonymous"} — ${dist}`;
           leaderboardBox.appendChild(li);
         });
       }
+
+      // Add sync status indicator
+      const statusDiv = document.createElement("div");
+      statusDiv.style.textAlign = "center";
+      statusDiv.style.fontSize = "0.8em";
+      statusDiv.style.color = "#666";
+      statusDiv.style.marginTop = "10px";
+      statusDiv.textContent = syncSource === "local" ? "📱 Local scores only" : `🌐 Global scores (${syncSource})`;
+      leaderboardBox.parentElement.appendChild(statusDiv);
     }
 
     loadRandomWeather();
