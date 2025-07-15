@@ -28,25 +28,33 @@
       background: rgba(255, 255, 255, 0.85);
       text-align: center;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
     }
 
     header h1 {
       margin: 0;
       font-size: 2rem;
+      flex-basis: 100%;
     }
 
     header p {
-      margin: 0.5rem 0 1rem;
+      margin: 0 0 1rem 0;
       font-size: 1.1rem;
+      flex-basis: 100%;
     }
 
     #searchForm {
       max-width: 400px;
-      margin: 0 auto;
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
       justify-content: center;
+      flex-grow: 1;
+      min-width: 260px;
     }
 
     #searchInput {
@@ -56,7 +64,7 @@
       border-radius: 24px;
       font-size: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      min-width: 200px;
+      min-width: 150px;
     }
 
     #searchButton {
@@ -92,6 +100,65 @@
       background-color: #e64a19;
     }
 
+    #settingsBtn {
+      padding: 0.5rem 1rem;
+      background-color: #777;
+      border: none;
+      border-radius: 24px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      min-width: 120px;
+    }
+    #settingsBtn:hover {
+      background-color: #555;
+    }
+
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 10000;
+      min-width: 280px;
+      text-align: center;
+    }
+    #settingsModal.show {
+      display: block;
+    }
+    #settingsModal label {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    #settingsModal select {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+    #settingsModal button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #settingsModal button:hover {
+      background-color: #357ABD;
+    }
+
     main {
       max-width: 1000px;
       margin: 1rem auto;
@@ -104,11 +171,56 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    #weatherContainer, #favoritesContainer {
+    /* Favorite section right below map */
+    #favoritesSection {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    #favoritesSection h2 {
+      margin-top: 0;
+    }
+
+    #addFavoriteForm {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #addFavoriteInput {
+      flex-grow: 1;
+      padding: 0.5rem 1rem;
+      border-radius: 24px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      min-width: 200px;
+    }
+
+    #addFavoriteBtn {
+      padding: 0.5rem 1.2rem;
+      background-color: #f0ad4e;
+      border: none;
+      border-radius: 24px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      min-width: 120px;
+      transition: background-color 0.3s ease;
+    }
+
+    #addFavoriteBtn:hover {
+      background-color: #ec971f;
+    }
+
+    #favoritesContainer {
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
-      margin-top: 1rem;
       justify-content: center;
     }
 
@@ -119,8 +231,9 @@
       width: 200px;
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
+      cursor: pointer;
       position: relative;
+      transition: transform 0.2s;
     }
 
     .city-weather:hover {
@@ -141,41 +254,23 @@
       color: #444;
     }
 
-    button.fav-btn, button.remove-fav-btn {
-      margin-top: 0.8rem;
-      padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.3s ease;
-    }
-
-    button.fav-btn {
-      background-color: #f0ad4e;
-      color: white;
-    }
-
-    button.fav-btn:hover {
-      background-color: #ec971f;
-    }
-
-    button.remove-fav-btn {
+    .remove-fav-btn {
       background-color: #d9534f;
       color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      padding: 0;
       position: absolute;
       top: 8px;
       right: 8px;
-      width: 24px;
-      height: 24px;
-      font-size: 16px;
-      line-height: 24px;
-      padding: 0;
-      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-
-    button.remove-fav-btn:hover {
+    .remove-fav-btn:hover {
       background-color: #c9302c;
     }
 
@@ -217,7 +312,7 @@
     }
 
     @media (max-width: 600px) {
-      #weatherContainer, #favoritesContainer {
+      #favoritesContainer {
         flex-direction: column;
         align-items: center;
       }
@@ -225,7 +320,7 @@
         flex-direction: column;
         gap: 0.5rem;
       }
-      #searchInput, #searchButton, #gameButton {
+      #searchInput, #searchButton, #gameButton, #addFavoriteInput, #addFavoriteBtn, #settingsBtn {
         min-width: 100%;
         border-radius: 24px;
       }
@@ -235,29 +330,33 @@
 <body>
 
 <header>
-  <h1>MapMyWeather</h1>
-  <p>Explore real-time weather worldwide or search any city below</p>
+  <h1 id="title">MapMyWeather</h1>
+  <p id="subtitle">Explore real-time weather worldwide or search any city below</p>
   <form id="searchForm">
     <input type="search" id="searchInput" placeholder="Search a city (e.g. London)" required />
     <button type="submit" id="searchButton">Search</button>
     <button type="button" id="gameButton" onclick="location.href='game.html'">🎮 Play WeatherGuessr</button>
+    <button type="button" id="settingsBtn">Settings ⚙️</button>
   </form>
 </header>
 
 <main>
   <div id="map"></div>
-  <div id="weatherContainer"></div>
 
-  <section id="favoritesSection" style="margin-top: 2rem;">
-    <h2>Your Favorite Locations</h2>
+  <section id="favoritesSection">
+    <h2 id="favoritesTitle">Your Favorite Locations</h2>
+    <form id="addFavoriteForm">
+      <input type="text" id="addFavoriteInput" placeholder="Add a city to favorites" required />
+      <button type="submit" id="addFavoriteBtn">Add to Favorites</button>
+    </form>
     <div id="favoritesContainer">
       <!-- Favorite cities weather cards will be rendered here -->
     </div>
   </section>
 
   <section id="about">
-    <h2>About MapMyWeather</h2>
-    <p>
+    <h2 id="aboutTitle">About MapMyWeather</h2>
+    <p id="aboutText">
       MapMyWeather is an interactive world map showing current weather conditions for major global cities.
       Click on any marker to learn more about the weather there, or use the search bar to view a detailed forecast.
       This app is powered by <strong>WeatherAPI.com</strong> and is entirely free to use.
@@ -274,13 +373,84 @@
   Help Us Improve
 </a>
 
+<!-- Settings Modal -->
+<div id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalLabel">
+  <label for="languageSelect" id="settingsModalLabel">Select Language / Selecionar Idioma</label>
+  <select id="languageSelect" aria-describedby="settingsModalLabel">
+    <option value="en">English</option>
+    <option value="pt">Português (Brasil)</option>
+  </select>
+  <button id="saveSettingsBtn">Save</button>
+</div>
+
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
   const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
 
-  // List of cities to display markers and fetch weather
+  // Translations dictionary for UI text
+  const translations = {
+    en: {
+      title: "MapMyWeather",
+      subtitle: "Explore real-time weather worldwide or search any city below",
+      searchPlaceholder: "Search a city (e.g. London)",
+      searchButton: "Search",
+      gameButton: "🎮 Play WeatherGuessr",
+      settingsBtn: "Settings ⚙️",
+      favoritesTitle: "Your Favorite Locations",
+      addFavoritePlaceholder: "Add a city to favorites",
+      addFavoriteBtn: "Add to Favorites",
+      aboutTitle: "About MapMyWeather",
+      aboutText: "MapMyWeather is an interactive world map showing current weather conditions for major global cities.\nClick on any marker to learn more about the weather there, or use the search bar to view a detailed forecast.\nThis app is powered by WeatherAPI.com and is entirely free to use.",
+      noFavorites: "No favorite locations yet.",
+      removeFavTitle: "Remove from favorites",
+      settingsLabel: "Select Language / Selecionar Idioma",
+      saveBtn: "Save"
+    },
+    pt: {
+      title: "MapMeuTempo",
+      subtitle: "Explore o clima em tempo real mundialmente ou pesquise qualquer cidade abaixo",
+      searchPlaceholder: "Pesquise uma cidade (ex: Londres)",
+      searchButton: "Pesquisar",
+      gameButton: "🎮 Jogar WeatherGuessr",
+      settingsBtn: "Configurações ⚙️",
+      favoritesTitle: "Seus locais favoritos",
+      addFavoritePlaceholder: "Adicione uma cidade aos favoritos",
+      addFavoriteBtn: "Adicionar aos favoritos",
+      aboutTitle: "Sobre o MapMeuTempo",
+      aboutText: "MapMeuTempo é um mapa interativo mundial que mostra condições climáticas atuais para as principais cidades globais.\nClique em qualquer marcador para saber mais sobre o clima, ou use a barra de pesquisa para ver a previsão detalhada.\nEste app é alimentado pelo WeatherAPI.com e é totalmente gratuito.",
+      noFavorites: "Nenhum local favorito ainda.",
+      removeFavTitle: "Remover dos favoritos",
+      settingsLabel: "Selecione o idioma / Select Language",
+      saveBtn: "Salvar"
+    }
+  };
+
+  // Detect or load language from localStorage
+  let lang = localStorage.getItem("mapmyweather_language") || "en";
+
+  // Set language UI texts
+  function applyTranslations() {
+    const t = translations[lang];
+    document.getElementById("title").textContent = t.title;
+    document.getElementById("subtitle").textContent = t.subtitle;
+    document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+    document.getElementById("searchButton").textContent = t.searchButton;
+    document.getElementById("gameButton").textContent = t.gameButton;
+    document.getElementById("settingsBtn").textContent = t.settingsBtn;
+    document.getElementById("favoritesTitle").textContent = t.favoritesTitle;
+    document.getElementById("addFavoriteInput").placeholder = t.addFavoritePlaceholder;
+    document.getElementById("addFavoriteBtn").textContent = t.addFavoriteBtn;
+    document.getElementById("aboutTitle").textContent = t.aboutTitle;
+    document.getElementById("aboutText").textContent = t.aboutText;
+    document.getElementById("settingsModalLabel").textContent = t.settingsLabel;
+    document.getElementById("saveSettingsBtn").textContent = t.saveBtn;
+  }
+
+  applyTranslations();
+
+  // Initialize map and markers
   const cities = [
     { name: "New York", coords: [40.7128, -74.0060] },
     { name: "London", coords: [51.5074, -0.1278] },
@@ -296,144 +466,129 @@
     { name: "Istanbul", coords: [41.0082, 28.9784] }
   ];
 
-  // Initialize map
   const map = L.map("map").setView([20, 0], 2);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Add markers and fetch weather for each city
   cities.forEach(city => {
     const marker = L.marker(city.coords).addTo(map);
     marker.bindPopup(city.name);
-    fetchWeather(city.name);
+    marker.on("click", () => {
+      window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
+    });
   });
 
-  // Fetch current weather for city and display on page
-  function fetchWeather(cityName) {
-    const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(cityName)}`;
-    fetch(url)
-      .then(response => {
-        if (!response.ok) throw new Error("Weather not found");
-        return response.json();
-      })
-      .then(data => displayWeather(data))
-      .catch(err => console.error(`Error loading weather for ${cityName}:`, err));
-  }
-
-  // LOCAL STORAGE FAVORITES SYSTEM
-  const FAVORITES_KEY = "mapmyweather_favorites";
-
+  // Favorites management
   function getFavorites() {
-    const favs = localStorage.getItem(FAVORITES_KEY);
-    return favs ? JSON.parse(favs) : [];
+    return JSON.parse(localStorage.getItem("mapmyweather_favorites") || "[]");
   }
 
   function saveFavorites(favorites) {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    localStorage.setItem("mapmyweather_favorites", JSON.stringify(favorites));
   }
 
-  function addFavorite(cityName) {
+  function addFavorite(city) {
     const favorites = getFavorites();
-    if (!favorites.includes(cityName)) {
-      favorites.push(cityName);
+    if (!favorites.includes(city)) {
+      favorites.push(city);
       saveFavorites(favorites);
       renderFavorites();
     }
   }
 
-  function removeFavorite(cityName) {
+  function removeFavorite(city) {
     let favorites = getFavorites();
-    favorites = favorites.filter(c => c !== cityName);
+    favorites = favorites.filter(c => c.toLowerCase() !== city.toLowerCase());
     saveFavorites(favorites);
     renderFavorites();
   }
 
-  // Render favorites section with weather cards
+  // Render favorite cities weather
   function renderFavorites() {
     const container = document.getElementById("favoritesContainer");
     container.innerHTML = "";
-
     const favorites = getFavorites();
+    const t = translations[lang];
+
     if (favorites.length === 0) {
-      container.innerHTML = "<p>No favorite locations yet.</p>";
+      const noFav = document.createElement("p");
+      noFav.textContent = t.noFavorites;
+      container.appendChild(noFav);
       return;
     }
 
     favorites.forEach(city => {
-      const favDiv = document.createElement("div");
-      favDiv.className = "city-weather favorite-city";
-      favDiv.style.cursor = "pointer";
-      favDiv.title = "Click to view detailed forecast";
+      const div = document.createElement("div");
+      div.className = "city-weather";
+      div.title = city;
+      div.tabIndex = 0;
+      div.setAttribute("role", "button");
+      div.setAttribute("aria-label", `${city}, ${t.removeFavTitle}`);
 
-      favDiv.addEventListener("click", () => {
+      div.addEventListener("click", () => {
         window.location.href = `weather.html?city=${encodeURIComponent(city)}`;
       });
+      div.addEventListener("keypress", e => {
+        if (e.key === "Enter") {
+          window.location.href = `weather.html?city=${encodeURIComponent(city)}`;
+        }
+      });
 
+      // Fetch weather for each favorite city
       fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city)}`)
         .then(res => {
           if (!res.ok) throw new Error("Weather not found");
           return res.json();
         })
         .then(data => {
-          favDiv.innerHTML = `
+          div.innerHTML = `
             <h3>${data.location.name}</h3>
             <div class="temp">${Math.round(data.current.temp_c)}°C</div>
             <div class="desc">${data.current.condition.text}</div>
-            <div>Humidity: ${data.current.humidity}%</div>
-            <div>Wind: ${Math.round(data.current.wind_kph)} km/h</div>
-            <button class="remove-fav-btn" title="Remove from favorites">✖</button>
+            <div>${t.removeFavTitle}: 
+              <button class="remove-fav-btn" title="${t.removeFavTitle}" aria-label="${t.removeFavTitle}">✖</button>
+            </div>
           `;
-          container.appendChild(favDiv);
+          container.appendChild(div);
 
-          favDiv.querySelector(".remove-fav-btn").addEventListener("click", e => {
+          div.querySelector(".remove-fav-btn").addEventListener("click", e => {
             e.stopPropagation();
             removeFavorite(city);
           });
         })
-        .catch(err => {
-          console.error(`Failed to load favorite weather for ${city}`, err);
-          favDiv.textContent = `Failed to load ${city}`;
-          container.appendChild(favDiv);
+        .catch(() => {
+          div.innerHTML = `
+            <h3>${city}</h3>
+            <p>❌ Weather data unavailable</p>
+            <button class="remove-fav-btn" title="${t.removeFavTitle}" aria-label="${t.removeFavTitle}">✖</button>
+          `;
+          container.appendChild(div);
+
+          div.querySelector(".remove-fav-btn").addEventListener("click", e => {
+            e.stopPropagation();
+            removeFavorite(city);
+          });
         });
     });
   }
 
-  // Updated displayWeather to add favorite button
-  function displayWeather(data) {
-    const container = document.getElementById("weatherContainer");
+  // Initial render of favorites on page load
+  renderFavorites();
 
-    const cityName = data.location.name;
-    const favorites = getFavorites();
-    const isFavorited = favorites.includes(cityName);
+  // Handle add favorite form submit
+  document.getElementById("addFavoriteForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const input = document.getElementById("addFavoriteInput");
+    const cityName = input.value.trim();
+    if (cityName) {
+      addFavorite(cityName);
+      input.value = "";
+    }
+  });
 
-    const div = document.createElement("div");
-    div.className = "city-weather";
-    div.innerHTML = `
-      <h3>${cityName}</h3>
-      <div class="temp">${Math.round(data.current.temp_c)}°C</div>
-      <div class="desc">${data.current.condition.text}</div>
-      <div>Humidity: ${data.current.humidity}%</div>
-      <div>Wind: ${Math.round(data.current.wind_kph)} km/h</div>
-      <button class="fav-btn">${isFavorited ? "★ Remove Favorite" : "☆ Add Favorite"}</button>
-    `;
-
-    container.appendChild(div);
-
-    const favBtn = div.querySelector(".fav-btn");
-    favBtn.addEventListener("click", () => {
-      if (getFavorites().includes(cityName)) {
-        removeFavorite(cityName);
-        favBtn.textContent = "☆ Add Favorite";
-      } else {
-        addFavorite(cityName);
-        favBtn.textContent = "★ Remove Favorite";
-      }
-    });
-  }
-
-  // Search form handler
+  // Handle search form submit (redirect to weather page)
   document.getElementById("searchForm").addEventListener("submit", e => {
     e.preventDefault();
     const city = document.getElementById("searchInput").value.trim();
@@ -442,9 +597,41 @@
     }
   });
 
-  // Render favorites on page load
-  renderFavorites();
+  // Settings modal toggling
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsModal = document.getElementById("settingsModal");
+  const languageSelect = document.getElementById("languageSelect");
+  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
 
+  // Initialize select with current lang
+  languageSelect.value = lang;
+
+  settingsBtn.addEventListener("click", () => {
+    settingsModal.classList.toggle("show");
+    languageSelect.focus();
+  });
+
+  // Close modal if click outside or Escape pressed
+  window.addEventListener("click", e => {
+    if (settingsModal.classList.contains("show") && !settingsModal.contains(e.target) && e.target !== settingsBtn) {
+      settingsModal.classList.remove("show");
+    }
+  });
+
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape" && settingsModal.classList.contains("show")) {
+      settingsModal.classList.remove("show");
+    }
+  });
+
+  // Save settings and reload UI text
+  saveSettingsBtn.addEventListener("click", () => {
+    lang = languageSelect.value;
+    localStorage.setItem("mapmyweather_language", lang);
+    applyTranslations();
+    renderFavorites(); // Refresh favorites text as well
+    settingsModal.classList.remove("show");
+  });
 </script>
 
 </body>
