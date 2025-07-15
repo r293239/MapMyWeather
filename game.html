@@ -237,8 +237,7 @@
             }
           }
 
-          // Using a more reliable CORS proxy
-          fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://parseapi.back4app.com/classes/Leaderboard"), {
+          fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard", {
             method: "POST",
             headers: {
               "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
@@ -261,7 +260,7 @@
     async function displayLeaderboard(localBoard = null) {
       leaderboardBox.innerHTML = "Loading...";
       try {
-        const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10"), {
+        const res = await fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
           headers: {
             "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
             "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
