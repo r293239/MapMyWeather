@@ -95,9 +95,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
-    const APPLICATION_ID = "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr";
-    const REST_API_KEY = "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ";
-
     let map = L.map("map").setView([20, 0], 2);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
@@ -117,21 +114,16 @@
     const leaderboardBox = document.getElementById("leaderboardList");
 
     function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // meters
+      const R = 6371e3;
       const toRad = x => x * Math.PI / 180;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     function getRandomCoords() {
-      const lat = Math.random() * 170 - 85;
-      const lon = Math.random() * 360 - 180;
-      return [lat, lon];
+      return [Math.random() * 170 - 85, Math.random() * 360 - 180];
     }
 
     async function loadRandomWeather() {
@@ -139,7 +131,6 @@
       confirmBtn.disabled = true;
       playAgainBtn.style.display = "none";
       weatherHint.textContent = "Loading weather...";
-
       if (actualMarker) map.removeLayer(actualMarker);
       if (guessMarker) map.removeLayer(guessMarker);
 
@@ -147,14 +138,10 @@
       do {
         actualLocation = getRandomCoords();
         tries++;
-      } while (
-        previousLocation &&
-        getDistance(previousLocation[0], previousLocation[1], actualLocation[0], actualLocation[1]) < 5000000 &&
-        tries < 10
-      );
+      } while (previousLocation && getDistance(...previousLocation, ...actualLocation) < 5000000 && tries < 10);
       previousLocation = actualLocation;
 
-      map.setView([20, 0], 2); // zoomed out world view
+      map.setView([20, 0], 2);
 
       try {
         const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${actualLocation[0]},${actualLocation[1]}`;
@@ -175,7 +162,6 @@
 
     map.on("click", e => {
       if (resultBox.style.display === "block") return;
-
       if (guessMarker) {
         guessMarker.setLatLng(e.latlng);
       } else {
@@ -188,15 +174,11 @@
 
     confirmBtn.addEventListener("click", () => {
       if (!guessMarker) return;
-
       confirmBtn.disabled = true;
       const g = guessMarker.getLatLng();
       const a = [weatherData.location.lat, weatherData.location.lon];
       const distance = getDistance(g.lat, g.lng, a[0], a[1]);
-
-      let distanceStr = distance >= 10000
-        ? `${Math.round(distance / 1000)} km`
-        : `${Math.round(distance)} meters`;
+      const distanceStr = distance >= 10000 ? `${Math.round(distance / 1000)} km` : `${Math.round(distance)} meters`;
 
       resultBox.style.display = "block";
       resultBox.innerHTML = `
@@ -216,98 +198,61 @@
 
     playAgainBtn.addEventListener("click", loadRandomWeather);
 
-    // Back4App leaderboard integration
+    function updateLeaderboard(distance) {
+      let board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+      board.push({ name: "", distance });
+      board.sort((a, b) => a.distance - b.distance);
+      board = board.slice(0, 10);
 
-    async function saveScoreToBackend(playerName, distance) {
-      try {
-        const res = await fetch("https://parseapi.back4app.com/classes/Leaderboard", {
-          method: "POST",
-          headers: {
-            "X-Parse-Application-Id": APPLICATION_ID,
-            "X-Parse-REST-API-Key": REST_API_KEY,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ name: playerName, distance: distance })
-        });
-        const data = await res.json();
-        if (data.objectId) {
-          alert("Score submitted!");
-          fetchLeaderboardFromBackend(); // Refresh leaderboard
-        } else {
-          alert("Failed to submit score.");
-          console.error("Save error:", data);
-        }
-      } catch (err) {
-        alert("Error submitting score.");
-        console.error(err);
-      }
-    }
-
-    async function fetchLeaderboardFromBackend() {
-      try {
-        const res = await fetch("https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
-          headers: {
-            "X-Parse-Application-Id": APPLICATION_ID,
-            "X-Parse-REST-API-Key": REST_API_KEY
+      const qualifies = board.some(e => e.name === "");
+      if (qualifies) {
+        const name = prompt("🎉 You're in the top 10! Enter your name:");
+        if (name) {
+          for (let entry of board) {
+            if (entry.name === "") {
+              entry.name = name;
+              break;
+            }
           }
-        });
-        const data = await res.json();
-        if (data.results) {
-          displayLeaderboard(data.results);
-        } else {
-          console.error("Fetch error:", data);
+
+          fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard", {
+            method: "POST",
+            headers: {
+              "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
+              "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, distance })
+          })
+          .then(res => res.json())
+          .then(data => {
+            console.log("✅ Score submitted:", data);
+          })
+          .catch(err => {
+            console.error("❌ Failed to submit score:", err);
+          });
         }
-      } catch (err) {
-        console.error("Failed to fetch leaderboard:", err);
       }
+
+      localStorage.setItem("weatherGuessrLeaderboard", JSON.stringify(board));
+      displayLeaderboard(board);
     }
 
-    function displayLeaderboard(entries) {
+    function displayLeaderboard(board = null) {
+      if (!board) {
+        board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+      }
       leaderboardBox.innerHTML = "";
-      for (const entry of entries) {
+      for (const entry of board) {
         const li = document.createElement("li");
-        const dist = entry.distance >= 10000
-          ? `${Math.round(entry.distance / 1000)} km`
-          : `${Math.round(entry.distance)} m`;
-        li.textContent = `${entry.name || "Anonymous"} — ${dist}`;
+        const formatted = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
+        li.textContent = `${entry.name || "Anonymous"} — ${formatted}`;
         leaderboardBox.appendChild(li);
       }
     }
 
-    async function updateLeaderboard(newDistance) {
-      try {
-        const res = await fetch("https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
-          headers: {
-            "X-Parse-Application-Id": APPLICATION_ID,
-            "X-Parse-REST-API-Key": REST_API_KEY
-          }
-        });
-        const data = await res.json();
-        if (!data.results) {
-          alert("Error loading leaderboard.");
-          return;
-        }
-        const entries = data.results;
-        const qualifies = entries.length < 10 || newDistance < entries[entries.length - 1].distance;
-
-        if (qualifies) {
-          const playerName = prompt("🎉 You're in the top 10! Enter your name:");
-          if (!playerName) {
-            alert("Name is required to save score.");
-            return;
-          }
-          await saveScoreToBackend(playerName, newDistance);
-        } else {
-          fetchLeaderboardFromBackend();
-        }
-      } catch (e) {
-        console.error("Error updating leaderboard:", e);
-      }
-    }
-
-    // Initial load
     loadRandomWeather();
-    fetchLeaderboardFromBackend();
+    displayLeaderboard();
   </script>
 </body>
 </html>
