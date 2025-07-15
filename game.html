@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WeatherGuessr - MapMyWeather</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
       font-family: sans-serif;
@@ -223,14 +220,8 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({ name, distance })
-          })
-          .then(res => res.json())
-          .then(data => {
-            console.log("✅ Score submitted:", data);
-          })
-          .catch(err => {
-            console.error("❌ Failed to submit score:", err);
-          });
+          }).then(() => displayLeaderboard())
+            .catch(err => console.error("❌ Submit error:", err));
         }
       }
 
@@ -238,16 +229,34 @@
       displayLeaderboard(board);
     }
 
-    function displayLeaderboard(board = null) {
-      if (!board) {
-        board = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
-      }
-      leaderboardBox.innerHTML = "";
-      for (const entry of board) {
-        const li = document.createElement("li");
-        const formatted = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
-        li.textContent = `${entry.name || "Anonymous"} — ${formatted}`;
-        leaderboardBox.appendChild(li);
+    async function displayLeaderboard(localBoard = null) {
+      leaderboardBox.innerHTML = "Loading...";
+      try {
+        const res = await fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
+          headers: {
+            "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
+            "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
+          }
+        });
+
+        const data = await res.json();
+        leaderboardBox.innerHTML = "";
+        data.results.forEach(entry => {
+          const li = document.createElement("li");
+          const dist = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
+          li.textContent = `${entry.name} — ${dist}`;
+          leaderboardBox.appendChild(li);
+        });
+      } catch (e) {
+        console.error("❌ Failed to load leaderboard:", e);
+        leaderboardBox.innerHTML = "<li>Failed to load leaderboard. Showing local scores:</li>";
+        if (!localBoard) localBoard = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
+        localBoard.forEach(entry => {
+          const li = document.createElement("li");
+          const formatted = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
+          li.textContent = `${entry.name || "Anonymous"} — ${formatted}`;
+          leaderboardBox.appendChild(li);
+        });
       }
     }
 
