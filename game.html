@@ -111,7 +111,7 @@
     const leaderboardBox = document.getElementById("leaderboardList");
 
     function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
+      const R = 6371e3; // Earth's radius in meters
       const toRad = x => x * Math.PI / 180;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
@@ -132,10 +132,31 @@
       if (guessMarker) map.removeLayer(guessMarker);
 
       let tries = 0;
+      const maxTries = 50; // Increased from 10 to 50 for better chance of finding valid location
+      const minDistance = 5000000; // 5000 km in meters
+      
       do {
         actualLocation = getRandomCoords();
         tries++;
-      } while (previousLocation && getDistance(...previousLocation, ...actualLocation) < 5000000 && tries < 10);
+        
+        // Add debug logging
+        if (previousLocation && tries > 1) {
+          const distance = getDistance(...previousLocation, ...actualLocation);
+          console.log(`Try ${tries}: Distance from previous location: ${Math.round(distance / 1000)} km`);
+        }
+        
+      } while (
+        previousLocation && 
+        getDistance(...previousLocation, ...actualLocation) < minDistance && 
+        tries < maxTries
+      );
+
+      // Log final result
+      if (previousLocation) {
+        const finalDistance = getDistance(...previousLocation, ...actualLocation);
+        console.log(`Final location selected after ${tries} tries. Distance: ${Math.round(finalDistance / 1000)} km`);
+      }
+
       previousLocation = actualLocation;
 
       map.setView([20, 0], 2);
@@ -146,13 +167,17 @@
         if (!res.ok) throw new Error("Failed to load weather");
         weatherData = await res.json();
 
+        // Update previousLocation to the actual weather API location for more accuracy
+        previousLocation = [weatherData.location.lat, weatherData.location.lon];
+
         weatherHint.innerHTML = `
           <strong>Weather Conditions:</strong><br>
           ${weatherData.current.condition.text}, ${weatherData.current.temp_c}°C<br>
           Humidity: ${weatherData.current.humidity}%<br>
           Wind: ${weatherData.current.wind_kph} km/h
         `;
-      } catch {
+      } catch (error) {
+        console.error("Weather API error:", error);
         weatherHint.textContent = "⚠️ Failed to load weather. Try again.";
       }
     }
@@ -212,7 +237,8 @@
             }
           }
 
-          fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard", {
+          // Using a more reliable CORS proxy
+          fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://parseapi.back4app.com/classes/Leaderboard"), {
             method: "POST",
             headers: {
               "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
@@ -221,7 +247,10 @@
             },
             body: JSON.stringify({ name, distance })
           }).then(() => displayLeaderboard())
-            .catch(err => console.error("❌ Submit error:", err));
+            .catch(err => {
+              console.error("❌ Submit error:", err);
+              displayLeaderboard(board);
+            });
         }
       }
 
@@ -232,7 +261,7 @@
     async function displayLeaderboard(localBoard = null) {
       leaderboardBox.innerHTML = "Loading...";
       try {
-        const res = await fetch("https://corsproxy.io/?https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
+        const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10"), {
           headers: {
             "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
             "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
