@@ -325,6 +325,44 @@
         border-radius: 24px;
       }
     }
+    // Weather tooltip on marker press-and-hold
+let weatherTooltip;
+
+cities.forEach(city => {
+  const marker = L.marker(city.coords).addTo(map);
+  marker.bindPopup(city.name);
+
+  marker.on("click", () => {
+    window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
+  });
+
+  marker.on("mousedown", async () => {
+    try {
+      const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`);
+      const data = await res.json();
+
+      weatherTooltip = L.popup({
+        closeButton: false,
+        autoClose: false,
+        className: 'weather-desc-popup'
+      })
+        .setLatLng(city.coords)
+        .setContent(`<strong>${city.name}</strong><br>${data.current.condition.text}, ${data.current.temp_c}°C`)
+        .openOn(map);
+    } catch (err) {
+      console.error("Weather fetch error:", err);
+    }
+  });
+
+  marker.on("mouseup", () => {
+    if (weatherTooltip) map.closePopup(weatherTooltip);
+  });
+
+  marker.on("mouseout", () => {
+    if (weatherTooltip) map.closePopup(weatherTooltip);
+  });
+});
+
   </style>
 </head>
 <body>
@@ -632,6 +670,44 @@
     renderFavorites(); // Refresh favorites text as well
     settingsModal.classList.remove("show");
   });
+  // Weather tooltip on marker press-and-hold
+let weatherTooltip;
+
+cities.forEach(city => {
+  const marker = L.marker(city.coords).addTo(map);
+  marker.bindPopup(city.name);
+
+  marker.on("click", () => {
+    window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
+  });
+
+  marker.on("mousedown", async () => {
+    try {
+      const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`);
+      const data = await res.json();
+
+      weatherTooltip = L.popup({
+        closeButton: false,
+        autoClose: false,
+        className: 'weather-desc-popup'
+      })
+        .setLatLng(city.coords)
+        .setContent(`<strong>${city.name}</strong><br>${data.current.condition.text}, ${data.current.temp_c}°C`)
+        .openOn(map);
+    } catch (err) {
+      console.error("Weather fetch error:", err);
+    }
+  });
+
+  marker.on("mouseup", () => {
+    if (weatherTooltip) map.closePopup(weatherTooltip);
+  });
+
+  marker.on("mouseout", () => {
+    if (weatherTooltip) map.closePopup(weatherTooltip);
+  });
+});
+
 </script>
 
 </body>
