@@ -16,20 +16,72 @@
       margin-top: 0.8rem;
     }
     #map {
-      height: 400px;
+      height: 300px;
       width: 90%;
-      max-width: 900px;
+      max-width: 600px;
       margin: 1rem auto;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     .info-box {
       background: white;
-      max-width: 500px;
+      max-width: 600px;
       margin: 1rem auto;
       padding: 1rem;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .guess-container {
+      background: white;
+      max-width: 600px;
+      margin: 1rem auto;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+    .slider-group {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .slider-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    .slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #00796b;
+      cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #00796b;
+      cursor: pointer;
+      border: none;
+    }
+    .slider-value {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #00796b;
+      margin-top: 0.5rem;
     }
     .leaderboard {
       margin: 1rem auto;
@@ -66,24 +118,67 @@
       background-color: #9e9e9e;
       cursor: not-allowed;
     }
+    .score-display {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #00796b;
+      margin: 1rem 0;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .result-item {
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: #f0f0f0;
+    }
+    .result-item.excellent { background: #c8e6c9; }
+    .result-item.good { background: #fff3e0; }
+    .result-item.poor { background: #ffcdd2; }
   </style>
 </head>
 <body>
   <h1>🌍 WeatherGuessr</h1>
-  <p>Guess where this weather is happening. Click on the map to place your guess, then hit Confirm.</p>
+  <p>Look at the location and guess the current weather conditions!</p>
 
-  <div class="info-box" id="weatherHint">Loading weather...</div>
+  <div class="info-box" id="locationHint">Loading location...</div>
   <div id="map"></div>
 
+  <div class="guess-container" id="guessContainer">
+    <h3>🎯 Make Your Weather Predictions</h3>
+    
+    <div class="slider-group">
+      <label for="tempSlider">Temperature (°C)</label>
+      <input type="range" id="tempSlider" class="slider" min="-30" max="50" value="20">
+      <div class="slider-value" id="tempValue">20°C</div>
+    </div>
+    
+    <div class="slider-group">
+      <label for="humiditySlider">Humidity (%)</label>
+      <input type="range" id="humiditySlider" class="slider" min="0" max="100" value="50">
+      <div class="slider-value" id="humidityValue">50%</div>
+    </div>
+    
+    <div class="slider-group">
+      <label for="windSlider">Wind Speed (km/h)</label>
+      <input type="range" id="windSlider" class="slider" min="0" max="100" value="10">
+      <div class="slider-value" id="windValue">10 km/h</div>
+    </div>
+  </div>
+
   <div>
-    <button id="confirmBtn" disabled>Confirm Guess</button>
+    <button id="submitBtn">Submit Guess</button>
     <button id="playAgainBtn" style="display:none;">Play Again</button>
   </div>
 
   <div class="info-box" id="resultBox" style="display:none;"></div>
 
   <div class="leaderboard" id="leaderboardBox">
-    <h3>🏆 Top 10 Closest Guesses</h3>
+    <h3>🏆 Top 10 Highest Scores</h3>
     <ol id="leaderboardList"></ol>
   </div>
 
@@ -98,68 +193,93 @@
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
 
-    let actualMarker = null;
-    let guessMarker = null;
+    let locationMarker = null;
     let actualLocation = null;
     let weatherData = null;
-    let previousLocation = null;
+    let totalScore = 0;
+    let roundsPlayed = 0;
 
-    const weatherHint = document.getElementById("weatherHint");
-    const confirmBtn = document.getElementById("confirmBtn");
+    const locationHint = document.getElementById("locationHint");
+    const submitBtn = document.getElementById("submitBtn");
     const playAgainBtn = document.getElementById("playAgainBtn");
     const resultBox = document.getElementById("resultBox");
     const leaderboardBox = document.getElementById("leaderboardList");
+    const guessContainer = document.getElementById("guessContainer");
 
-    function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // Earth's radius in meters
-      const toRad = x => x * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
+    // Slider elements
+    const tempSlider = document.getElementById("tempSlider");
+    const humiditySlider = document.getElementById("humiditySlider");
+    const windSlider = document.getElementById("windSlider");
+    const tempValue = document.getElementById("tempValue");
+    const humidityValue = document.getElementById("humidityValue");
+    const windValue = document.getElementById("windValue");
+
+    // Update slider displays
+    tempSlider.oninput = () => tempValue.textContent = `${tempSlider.value}°C`;
+    humiditySlider.oninput = () => humidityValue.textContent = `${humiditySlider.value}%`;
+    windSlider.oninput = () => windValue.textContent = `${windSlider.value} km/h`;
 
     function getRandomCoords() {
-      return [Math.random() * 170 - 85, Math.random() * 360 - 180];
+      // Bias towards populated areas
+      const cities = [
+        [51.5074, -0.1278], // London
+        [40.7128, -74.0060], // New York
+        [35.6762, 139.6503], // Tokyo
+        [48.8566, 2.3522], // Paris
+        [52.5200, 13.4050], // Berlin
+        [55.7558, 37.6176], // Moscow
+        [39.9042, 116.4074], // Beijing
+        [28.6139, 77.2090], // Delhi
+        [19.0760, 72.8777], // Mumbai
+        [37.7749, -122.4194], // San Francisco
+        [34.0522, -118.2437], // Los Angeles
+        [41.9028, 12.4964], // Rome
+        [40.4168, -3.7038], // Madrid
+        [59.3293, 18.0686], // Stockholm
+        [45.4642, 9.1900], // Milan
+        [50.0755, 14.4378], // Prague
+        [47.4979, 19.0402], // Budapest
+        [52.3676, 4.9041], // Amsterdam
+        [60.1699, 24.9384], // Helsinki
+        [64.1466, -21.9426], // Reykjavik
+        [-33.8688, 151.2093], // Sydney
+        [-37.8136, 144.9631], // Melbourne
+        [43.6532, -79.3832], // Toronto
+        [49.2827, -123.1207], // Vancouver
+        [25.2048, 55.2708], // Dubai
+        [1.3521, 103.8198], // Singapore
+        [22.3193, 114.1694], // Hong Kong
+        [31.2304, 121.4737], // Shanghai
+        [37.5665, 126.9780], // Seoul
+        [35.6895, 51.3890], // Tehran
+        [30.0444, 31.2357], // Cairo
+        [-26.2041, 28.0473], // Johannesburg
+        [6.5244, 3.3792], // Lagos
+        [-23.5505, -46.6333], // São Paulo
+        [-34.6118, -58.3960], // Buenos Aires
+        [19.4326, -99.1332], // Mexico City
+        [14.5995, 120.9842] // Manila
+      ];
+      
+      if (Math.random() < 0.7) {
+        // 70% chance to pick from cities
+        return cities[Math.floor(Math.random() * cities.length)];
+      } else {
+        // 30% chance for truly random location
+        return [Math.random() * 170 - 85, Math.random() * 360 - 180];
+      }
     }
 
-    async function loadRandomWeather() {
+    async function loadRandomLocation() {
       resultBox.style.display = "none";
-      confirmBtn.disabled = true;
+      submitBtn.disabled = false;
       playAgainBtn.style.display = "none";
-      weatherHint.textContent = "Loading weather...";
-      if (actualMarker) map.removeLayer(actualMarker);
-      if (guessMarker) map.removeLayer(guessMarker);
-
-      let tries = 0;
-      const maxTries = 50; // Increased from 10 to 50 for better chance of finding valid location
-      const minDistance = 5000000; // 5000 km in meters
+      guessContainer.style.display = "block";
+      locationHint.textContent = "Loading location...";
       
-      do {
-        actualLocation = getRandomCoords();
-        tries++;
-        
-        // Add debug logging
-        if (previousLocation && tries > 1) {
-          const distance = getDistance(...previousLocation, ...actualLocation);
-          console.log(`Try ${tries}: Distance from previous location: ${Math.round(distance / 1000)} km`);
-        }
-        
-      } while (
-        previousLocation && 
-        getDistance(...previousLocation, ...actualLocation) < minDistance && 
-        tries < maxTries
-      );
+      if (locationMarker) map.removeLayer(locationMarker);
 
-      // Log final result
-      if (previousLocation) {
-        const finalDistance = getDistance(...previousLocation, ...actualLocation);
-        console.log(`Final location selected after ${tries} tries. Distance: ${Math.round(finalDistance / 1000)} km`);
-      }
-
-      previousLocation = actualLocation;
-
-      map.setView([20, 0], 2);
+      actualLocation = getRandomCoords();
 
       try {
         const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${actualLocation[0]},${actualLocation[1]}`;
@@ -167,95 +287,135 @@
         if (!res.ok) throw new Error("Failed to load weather");
         weatherData = await res.json();
 
-        // Update previousLocation to the actual weather API location for more accuracy
-        previousLocation = [weatherData.location.lat, weatherData.location.lon];
-
-        weatherHint.innerHTML = `
-          <strong>Weather Conditions:</strong><br>
-          ${weatherData.current.condition.text}, ${weatherData.current.temp_c}°C<br>
-          Humidity: ${weatherData.current.humidity}%<br>
-          Wind: ${weatherData.current.wind_kph} km/h
+        const location = [weatherData.location.lat, weatherData.location.lon];
+        locationMarker = L.marker(location).addTo(map);
+        map.setView(location, 8);
+        
+        locationHint.innerHTML = `
+          <strong>📍 Location:</strong> ${weatherData.location.name}, ${weatherData.location.country}<br>
+          <strong>🕐 Local Time:</strong> ${weatherData.location.localtime}<br>
+          <em>Guess the current weather conditions for this location!</em>
         `;
       } catch (error) {
         console.error("Weather API error:", error);
-        weatherHint.textContent = "⚠️ Failed to load weather. Try again.";
+        locationHint.textContent = "⚠️ Failed to load location. Try again.";
       }
     }
 
-    map.on("click", e => {
-      if (resultBox.style.display === "block") return;
-      if (guessMarker) {
-        guessMarker.setLatLng(e.latlng);
-      } else {
-        guessMarker = L.marker(e.latlng, { draggable: true }).addTo(map);
-        guessMarker.bindPopup("Your Guess").openPopup();
-        guessMarker.on("dragend", () => confirmBtn.disabled = false);
-      }
-      confirmBtn.disabled = false;
-    });
+    function calculateScore(tempGuess, humidityGuess, windGuess) {
+      const actual = weatherData.current;
+      
+      // Calculate differences
+      const tempDiff = Math.abs(tempGuess - actual.temp_c);
+      const humidityDiff = Math.abs(humidityGuess - actual.humidity);
+      const windDiff = Math.abs(windGuess - actual.wind_kph);
+      
+      // Score calculation (max 100 points per category, 300 total)
+      const tempScore = Math.max(0, 100 - tempDiff * 2);
+      const humidityScore = Math.max(0, 100 - humidityDiff);
+      const windScore = Math.max(0, 100 - windDiff * 2);
+      
+      return {
+        tempScore: Math.round(tempScore),
+        humidityScore: Math.round(humidityScore),
+        windScore: Math.round(windScore),
+        totalScore: Math.round(tempScore + humidityScore + windScore),
+        tempDiff,
+        humidityDiff,
+        windDiff
+      };
+    }
 
-    function handleConfirmGuess() {
-      console.log("Confirm button clicked!"); // Debug log
-      
-      if (!guessMarker) {
-        console.log("No guess marker found");
-        alert("Please click on the map to place your guess first!");
-        return;
-      }
-      
+    function getAccuracyClass(score) {
+      if (score >= 80) return 'excellent';
+      if (score >= 50) return 'good';
+      return 'poor';
+    }
+
+    function handleSubmitGuess() {
       if (!weatherData) {
-        console.log("No weather data available");
         alert("Weather data not loaded. Please wait and try again.");
         return;
       }
       
-      try {
-        confirmBtn.disabled = true;
-        const g = guessMarker.getLatLng();
-        const a = [weatherData.location.lat, weatherData.location.lon];
-        const distance = getDistance(g.lat, g.lng, a[0], a[1]);
-        const distanceStr = distance >= 10000 ? `${Math.round(distance / 1000)} km` : `${Math.round(distance)} meters`;
+      const tempGuess = parseInt(tempSlider.value);
+      const humidityGuess = parseInt(humiditySlider.value);
+      const windGuess = parseInt(windSlider.value);
+      
+      const scores = calculateScore(tempGuess, humidityGuess, windGuess);
+      const actual = weatherData.current;
+      
+      totalScore += scores.totalScore;
+      roundsPlayed++;
+      
+      submitBtn.disabled = true;
+      guessContainer.style.display = "none";
+      playAgainBtn.style.display = "inline-block";
+      
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+        <h3>🎯 Results</h3>
+        <div class="score-display">Round Score: ${scores.totalScore}/300 points</div>
+        <div class="score-display">Total Score: ${totalScore} points (${roundsPlayed} rounds)</div>
+        
+        <div class="results-grid">
+          <div class="result-item ${getAccuracyClass(scores.tempScore)}">
+            <strong>🌡️ Temperature</strong><br>
+            Your guess: ${tempGuess}°C<br>
+            Actual: ${actual.temp_c}°C<br>
+            Score: ${scores.tempScore}/100
+          </div>
+          <div class="result-item ${getAccuracyClass(scores.humidityScore)}">
+            <strong>💧 Humidity</strong><br>
+            Your guess: ${humidityGuess}%<br>
+            Actual: ${actual.humidity}%<br>
+            Score: ${scores.humidityScore}/100
+          </div>
+          <div class="result-item ${getAccuracyClass(scores.windScore)}">
+            <strong>💨 Wind Speed</strong><br>
+            Your guess: ${windGuess} km/h<br>
+            Actual: ${actual.wind_kph} km/h<br>
+            Score: ${scores.windScore}/100
+          </div>
+        </div>
+        
+        <p><strong>Conditions:</strong> ${actual.condition.text}</p>
+        <p><strong>Feels like:</strong> ${actual.feelslike_c}°C</p>
+      `;
 
-        console.log(`Distance calculated: ${distanceStr}`);
-
-        resultBox.style.display = "block";
-        resultBox.innerHTML = `
-          <h3>🏁 Result</h3>
-          <p>You were <strong>${distanceStr}</strong> away.</p>
-          <p>The actual location was <strong>${weatherData.location.name}, ${weatherData.location.country}</strong>.</p>
-        `;
-
-        actualMarker = L.marker(a).addTo(map);
-        actualMarker.bindPopup(`📍 ${weatherData.location.name}`).openPopup();
-        const group = new L.featureGroup([actualMarker, guessMarker]);
-        map.fitBounds(group.getBounds().pad(0.5));
-        playAgainBtn.style.display = "inline-block";
-
-        updateLeaderboard(distance);
-      } catch (error) {
-        console.error("Error in confirm guess:", error);
-        alert("An error occurred. Please try again.");
-        confirmBtn.disabled = false;
+      // If player has played 5 rounds, offer to save to leaderboard
+      if (roundsPlayed >= 5) {
+        updateLeaderboard(totalScore, roundsPlayed);
       }
     }
 
-    confirmBtn.addEventListener("click", handleConfirmGuess);
-    confirmBtn.onclick = handleConfirmGuess; // Backup event handler
+    submitBtn.addEventListener("click", handleSubmitGuess);
+    
+    playAgainBtn.addEventListener("click", () => {
+      // Reset sliders to middle values
+      tempSlider.value = 20;
+      humiditySlider.value = 50;
+      windSlider.value = 10;
+      tempValue.textContent = "20°C";
+      humidityValue.textContent = "50%";
+      windValue.textContent = "10 km/h";
+      
+      loadRandomLocation();
+    });
 
-    playAgainBtn.addEventListener("click", loadRandomWeather);
-
-    function updateLeaderboard(distance) {
-      // Always update local storage first
+    function updateLeaderboard(finalScore, rounds) {
+      const avgScore = Math.round(finalScore / rounds);
+      
       let localBoard = JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
-      localBoard.push({ name: "", distance });
-      localBoard.sort((a, b) => a.distance - b.distance);
+      localBoard.push({ name: "", score: finalScore, rounds: rounds, avgScore: avgScore });
+      localBoard.sort((a, b) => b.score - a.score);
       localBoard = localBoard.slice(0, 10);
 
       const qualifies = localBoard.some(e => e.name === "");
       let playerName = null;
       
       if (qualifies) {
-        playerName = prompt("🎉 You're in the top 10! Enter your name:");
+        playerName = prompt(`🎉 You're in the top 10 with ${finalScore} points over ${rounds} rounds!\nEnter your name:`);
         if (playerName) {
           for (let entry of localBoard) {
             if (entry.name === "") {
@@ -268,17 +428,15 @@
 
       localStorage.setItem("weatherGuessrLeaderboard", JSON.stringify(localBoard));
 
-      // Try to sync with multiple backend options
       if (playerName) {
-        syncToBackend(playerName, distance);
+        syncToBackend(playerName, finalScore, rounds, avgScore);
       }
       
       displayLeaderboard(localBoard);
     }
 
-    async function syncToBackend(name, distance) {
+    async function syncToBackend(name, score, rounds, avgScore) {
       const backends = [
-        // Try JSONBin.io (free, reliable)
         {
           name: "JSONBin",
           submit: async () => {
@@ -290,13 +448,12 @@
               },
               body: JSON.stringify({
                 leaderboard: await getGlobalLeaderboard(),
-                newEntry: { name, distance, timestamp: Date.now() }
+                newEntry: { name, score, rounds, avgScore, timestamp: Date.now() }
               })
             });
             return response.ok;
           }
         },
-        // Try Firebase Realtime Database (if available)
         {
           name: "Firebase",
           submit: async () => {
@@ -308,7 +465,9 @@
                 },
                 body: JSON.stringify({
                   name: name,
-                  distance: distance,
+                  score: score,
+                  rounds: rounds,
+                  avgScore: avgScore,
                   timestamp: Date.now()
                 })
               });
@@ -318,7 +477,6 @@
             }
           }
         },
-        // Try the original Back4App with different CORS proxy
         {
           name: "Back4App",
           submit: async () => {
@@ -330,7 +488,7 @@
                   "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ",
                   "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name, distance })
+                body: JSON.stringify({ name, score, rounds, avgScore })
               });
               return response.ok;
             } catch (e) {
@@ -340,7 +498,6 @@
         }
       ];
 
-      // Try each backend until one works
       for (let backend of backends) {
         try {
           console.log(`Trying to sync with ${backend.name}...`);
@@ -358,7 +515,6 @@
     }
 
     async function getGlobalLeaderboard() {
-      // Try to get current global leaderboard
       try {
         const response = await fetch("https://api.jsonbin.io/v3/b/674d8a2fe41b4d34e4482c5f/latest", {
           headers: {
@@ -381,7 +537,6 @@
       let globalBoard = [];
       let syncSource = "local";
 
-      // Try to fetch from multiple sources
       const sources = [
         {
           name: "JSONBin",
@@ -417,7 +572,7 @@
           name: "Back4App",
           fetch: async () => {
             try {
-              const response = await fetch("https://cors-anywhere.herokuapp.com/https://parseapi.back4app.com/classes/Leaderboard?order=distance&limit=10", {
+              const response = await fetch("https://cors-anywhere.herokuapp.com/https://parseapi.back4app.com/classes/Leaderboard?order=-score&limit=10", {
                 headers: {
                   "X-Parse-Application-Id": "qXJqQ3HWKYsGVB1oQKnYZo7zdNLHgjZMiwonhozr",
                   "X-Parse-REST-API-Key": "mdTfymJLDHJY46HUv0tgKtWkqMm4YHQEbdsPX8tJ"
@@ -435,7 +590,6 @@
         }
       ];
 
-      // Try each source until one works
       for (let source of sources) {
         try {
           console.log(`Trying to load leaderboard from ${source.name}...`);
@@ -451,29 +605,25 @@
         }
       }
 
-      // If no global board found, use local fallback
       if (globalBoard.length === 0) {
         globalBoard = fallbackBoard || JSON.parse(localStorage.getItem("weatherGuessrLeaderboard")) || [];
         syncSource = "local";
       }
 
-      // Sort and display
-      globalBoard.sort((a, b) => a.distance - b.distance);
+      globalBoard.sort((a, b) => b.score - a.score);
       globalBoard = globalBoard.slice(0, 10);
 
       leaderboardBox.innerHTML = "";
       if (globalBoard.length === 0) {
-        leaderboardBox.innerHTML = "<li>No scores yet. Be the first to play!</li>";
+        leaderboardBox.innerHTML = "<li>No scores yet. Play 5 rounds to get on the leaderboard!</li>";
       } else {
         globalBoard.forEach((entry, index) => {
           const li = document.createElement("li");
-          const dist = entry.distance >= 10000 ? `${Math.round(entry.distance / 1000)} km` : `${Math.round(entry.distance)} m`;
-          li.textContent = `${entry.name || "Anonymous"} — ${dist}`;
+          li.textContent = `${entry.name || "Anonymous"} — ${entry.score || 0} pts (${entry.rounds || 1} rounds, avg: ${entry.avgScore || Math.round((entry.score || 0) / (entry.rounds || 1))})`;
           leaderboardBox.appendChild(li);
         });
       }
 
-      // Add sync status indicator
       const statusDiv = document.createElement("div");
       statusDiv.style.textAlign = "center";
       statusDiv.style.fontSize = "0.8em";
@@ -483,7 +633,8 @@
       leaderboardBox.parentElement.appendChild(statusDiv);
     }
 
-    loadRandomWeather();
+    // Initialize game
+    loadRandomLocation();
     displayLeaderboard();
   </script>
 </body>
