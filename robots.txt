@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://map-my-weather.netlify.app/sitemap.xml
