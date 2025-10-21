@@ -1,18 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Basic meta -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MapMyWeather — Global interactive weather map</title>
+  <meta name="description" content="MapMyWeather — an interactive global weather map with live forecasts, temperature, wind and rain overlays. Fast, mobile-friendly and easy to use.">
+
+  <!-- Canonical (important if same content appears elsewhere) -->
   <link rel="canonical" href="https://map-my-weather.netlify.app/">
-<meta name="robots" content="index, follow">
 
+  <!-- Favicon / icons -->
   <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512">
-<link rel="shortcut icon" href="/favicon.png" type="image/png">
+  <link rel="shortcut icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/favicon.png">
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MapMyWeather - Interactive Weather Map</title>
-  <meta name="description" content="MapMyWeather is a free interactive map that shows live weather for major cities and lets you search any city for a forecast. Powered by WeatherAPI.com." />
-  <meta name="keywords" content="weather, forecast, weather map, weather tracker, world map, free weather, interactive weather, city weather, global weather" />
-  <meta name="author" content="Reuben" />
+  <!-- Manifest (optional but good for PWA / mobile shortcuts) -->
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Social (Open Graph) -->
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MapMyWeather — Global interactive weather map" />
+  <meta property="og:description" content="Interactive global weather map with live forecasts, temperature, wind and rain overlays." />
+  <meta property="og:url" content="https://map-my-weather.netlify.app/" />
+  <meta property="og:site_name" content="MapMyWeather" />
+  <meta property="og:image" content="https://map-my-weather.netlify.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MapMyWeather — Global interactive weather map">
+  <meta name="twitter:description" content="Interactive global weather map with live forecasts, temperature, wind and rain overlays.">
+  <meta name="twitter:image" content="https://map-my-weather.netlify.app/og-image.png">
+
+  <!-- Robots -->
+  <meta name="robots" content="index, follow">
+
+  <!-- Structured data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://map-my-weather.netlify.app/#organization",
+        "name": "MapMyWeather",
+        "url": "https://map-my-weather.netlify.app/",
+        "logo": "https://map-my-weather.netlify.app/favicon.png",
+        "sameAs": []
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://map-my-weather.netlify.app/#website",
+        "url": "https://map-my-weather.netlify.app/",
+        "name": "MapMyWeather",
+        "description": "Interactive global weather map with live forecasts, temperature, wind and rain overlays.",
+        "publisher": { "@id": "https://map-my-weather.netlify.app/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://map-my-weather.netlify.app/?s={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
+  </script>
+
+</head>
 
   <!-- Leaflet CSS -->
   <link
