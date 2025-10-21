@@ -1,0 +1,17 @@
+{
+  "name": "MapMyWeather",
+  "short_name": "MapMyWeather",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E88E5",
+  "theme_color": "#2196F3",
+  "description": "Interactive global weather map with live forecasts, temperature, wind and rain overlays.",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
