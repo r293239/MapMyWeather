@@ -308,17 +308,18 @@
 
     /* City weather banners on map */
     .city-weather-banner {
-      position: absolute;
       background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
       padding: 0.8rem 1rem;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      z-index: 1000;
-      max-width: 250px;
       backdrop-filter: blur(5px);
       border-left: 4px solid var(--primary);
       transition: all 0.3s ease;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      min-width: 180px;
+      max-width: 200px;
+      text-align: center;
+      pointer-events: auto;
     }
     
     .city-weather-banner:hover {
@@ -328,28 +329,55 @@
     
     .city-weather-banner h3 {
       margin: 0 0 0.3rem 0;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .city-weather-banner .temp {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       color: var(--primary);
+      margin: 0.2rem 0;
     }
     
     .city-weather-banner .desc {
       font-style: italic;
       color: var(--gray);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       margin-bottom: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .city-weather-banner .details {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--gray);
+      gap: 0.5rem;
+    }
+    
+    .city-weather-banner .details span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* Custom marker cluster to prevent overlapping */
+    .weather-marker-cluster {
+      background: transparent;
+      border: none;
+    }
+    
+    .weather-marker-cluster div {
+      background: transparent;
+      border: none;
+      box-shadow: none;
     }
 
     /* Favorite section right below map */
@@ -545,8 +573,9 @@
         border-radius: 30px;
       }
       .city-weather-banner {
-        max-width: 200px;
-        font-size: 0.8rem;
+        max-width: 160px;
+        font-size: 0.75rem;
+        padding: 0.6rem 0.8rem;
       }
     }
   </style>
@@ -694,7 +723,7 @@
       addFavoritePlaceholder: "Ajouter une ville aux favoris",
       addFavoriteBtn: "Ajouter aux favoris",
       aboutTitle: "À propos de CarteMétéo",
-      aboutText: "CarteMétéo est une carte mondiale interactive affichant les conditions météorologiques actuelles pour les principales villes mondiales. Cliquez sur n'importe quel marqueur pour en savoir plus sur la météo là-bas, ou utilisez la barre de recherche pour afficher une prévision détaillée. Cette application est propulsée par WeatherAPI.com et est entièrement gratuite.",
+      aboutText: "CarteMétéo est une carte mondiale interactive affichant les conditions météorologiques actuelles pour les principales villes mondiales. Cliquez sur n'importe quel marqueur pour en savoir plus sobre la météo là-bas, ou utilisez la barre de recherche pour afficher une prévision détaillée. Cette application est propulsée par WeatherAPI.com et est entièrement gratuite.",
       noFavorites: "Aucun emplacement favori pour le moment.",
       removeFavTitle: "Supprimer des favoris",
       settingsLabel: "Sélectionner la langue",
@@ -900,18 +929,18 @@
 
   // Initialize map and markers
   const cities = [
-    { name: "New York", coords: [40.7128, -74.0060], bannerPos: [45, -80] },
-    { name: "London", coords: [51.5074, -0.1278], bannerPos: [55, -10] },
-    { name: "Tokyo", coords: [35.6762, 139.6503], bannerPos: [40, 145] },
-    { name: "Sydney", coords: [-33.8688, 151.2093], bannerPos: [-40, 155] },
-    { name: "Singapore", coords: [1.3521, 103.8198], bannerPos: [5, 108] },
-    { name: "Paris", coords: [48.8566, 2.3522], bannerPos: [50, 0] },
-    { name: "Dubai", coords: [25.276987, 55.296249], bannerPos: [28, 58] },
-    { name: "Toronto", coords: [43.65107, -79.347015], bannerPos: [48, -85] },
-    { name: "Rio de Janeiro", coords: [-22.9068, -43.1729], bannerPos: [-25, -40] },
-    { name: "Cape Town", coords: [-33.9249, 18.4241], bannerPos: [-38, 22] },
-    { name: "Moscow", coords: [55.7558, 37.6173], bannerPos: [60, 40] },
-    { name: "Istanbul", coords: [41.0082, 28.9784], bannerPos: [44, 32] }
+    { name: "New York", coords: [40.7128, -74.0060] },
+    { name: "London", coords: [51.5074, -0.1278] },
+    { name: "Tokyo", coords: [35.6762, 139.6503] },
+    { name: "Sydney", coords: [-33.8688, 151.2093] },
+    { name: "Singapore", coords: [1.3521, 103.8198] },
+    { name: "Paris", coords: [48.8566, 2.3522] },
+    { name: "Dubai", coords: [25.276987, 55.296249] },
+    { name: "Toronto", coords: [43.65107, -79.347015] },
+    { name: "Rio de Janeiro", coords: [-22.9068, -43.1729] },
+    { name: "Cape Town", coords: [-33.9249, 18.4241] },
+    { name: "Moscow", coords: [55.7558, 37.6173] },
+    { name: "Istanbul", coords: [41.0082, 28.9784] }
   ];
 
   const map = L.map("map").setView([20, 0], 2);
@@ -920,15 +949,19 @@
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Create weather banners for each city
-  function createWeatherBanner(city) {
+  // Create weather banners for each city with offset positions to prevent overlapping
+  function createWeatherBanner(city, index) {
     fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(city.name)}`)
       .then(res => {
         if (!res.ok) throw new Error("Weather not found");
         return res.json();
       })
       .then(data => {
-        const banner = L.marker(city.coords, {
+        // Calculate offset based on index to prevent overlapping
+        const offsetX = (index % 3) * 10 - 10; // -10, 0, 10
+        const offsetY = Math.floor(index / 3) * 15 - 15; // -15, 0, 15
+        
+        const banner = L.marker([city.coords[0] + offsetY * 0.5, city.coords[1] + offsetX * 0.5], {
           icon: L.divIcon({
             className: 'city-weather-banner',
             html: `
@@ -942,8 +975,8 @@
                 </div>
               </div>
             `,
-            iconSize: [250, 100],
-            iconAnchor: [125, 50]
+            iconSize: [180, 90],
+            iconAnchor: [90, 45]
           })
         }).addTo(map);
 
@@ -953,7 +986,7 @@
       })
       .catch(err => {
         console.error("Weather fetch error:", err);
-        // Add marker without weather data
+        // Add regular marker without weather data
         const marker = L.marker(city.coords).addTo(map);
         marker.bindPopup(city.name);
         marker.on("click", () => {
@@ -962,9 +995,9 @@
       });
   }
 
-  // Add weather banners for all cities
-  cities.forEach(city => {
-    createWeatherBanner(city);
+  // Add weather banners for all cities with staggered positions
+  cities.forEach((city, index) => {
+    createWeatherBanner(city, index);
   });
 
   // Favorites management
