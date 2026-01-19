@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,6 +113,8 @@
       --dark: #343a40;
       --gray: #6c757d;
       --success: #28a745;
+      --search-bg: rgba(255, 255, 255, 0.15);
+      --search-focus-bg: rgba(255, 255, 255, 0.25);
     }
     
     * {
@@ -128,113 +131,220 @@
 
     header {
       padding: 1.5rem 2rem;
-      background: rgba(255, 255, 255, 0.95);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.98) 100%);
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 1rem;
-      backdrop-filter: blur(10px);
+      gap: 1.5rem;
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     header h1 {
       margin: 0;
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       flex-basis: 100%;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      font-weight: 700;
+      font-weight: 800;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      letter-spacing: -0.5px;
     }
 
     header p {
-      margin: 0 0 1rem 0;
-      font-size: 1.1rem;
+      margin: 0 0 1.5rem 0;
+      font-size: 1.2rem;
       flex-basis: 100%;
       color: var(--gray);
+      font-weight: 400;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Enhanced Search Container */
+    .search-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     #searchForm {
-      max-width: 500px;
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      flex-grow: 1;
-      min-width: 260px;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
     }
 
     #searchInput {
-      flex-grow: 1;
-      padding: 0.75rem 1.2rem;
-      border: 2px solid transparent;
-      border-radius: 30px;
-      font-size: 1rem;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      min-width: 150px;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.9);
+      width: 100%;
+      padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+      border: 2px solid rgba(74, 144, 226, 0.2);
+      border-radius: 15px;
+      font-size: 1.1rem;
+      background: var(--search-bg);
+      backdrop-filter: blur(5px);
+      color: var(--dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
     #searchInput:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 3px 15px rgba(74, 144, 226, 0.3);
+      background: var(--search-focus-bg);
+      box-shadow: 0 6px 25px rgba(74, 144, 226, 0.25);
+      transform: translateY(-1px);
+    }
+
+    #searchInput::placeholder {
+      color: rgba(108, 117, 125, 0.7);
+      font-weight: 400;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 1.2rem;
+      z-index: 2;
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     #searchButton {
-      padding: 0.75rem 1.5rem;
+      flex: 1;
+      padding: 1rem 1.8rem;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       border: none;
-      border-radius: 30px;
+      border-radius: 12px;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 100px;
-      box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
     }
 
     #searchButton:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+      box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+      background: linear-gradient(135deg, var(--primary-dark), #2a6db5);
+    }
+
+    #searchButton:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
     }
 
     #gameButton {
-      padding: 0.75rem 1.5rem;
+      flex: 1;
+      padding: 1rem 1.8rem;
       background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
       border: none;
-      border-radius: 30px;
+      border-radius: 12px;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       min-width: 180px;
-      box-shadow: 0 3px 10px rgba(255, 112, 67, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(255, 112, 67, 0.3);
     }
 
     #gameButton:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 112, 67, 0.4);
+      box-shadow: 0 8px 25px rgba(255, 112, 67, 0.4);
+      background: linear-gradient(135deg, var(--secondary-dark), #cc3d13);
+    }
+
+    #gameButton:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(255, 112, 67, 0.3);
     }
 
     #settingsBtn {
-      padding: 0.6rem 1.2rem;
+      padding: 0.8rem 1.5rem;
       background: linear-gradient(135deg, var(--gray), #5a6268);
       border: none;
-      border-radius: 30px;
+      border-radius: 12px;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 120px;
-      box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
     }
+
     #settingsBtn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+      box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+      background: linear-gradient(135deg, #5a6268, #495057);
+    }
+
+    .quick-search-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .quick-search-tag {
+      padding: 0.5rem 1rem;
+      background: rgba(74, 144, 226, 0.1);
+      border: 1px solid rgba(74, 144, 226, 0.2);
+      border-radius: 20px;
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-search-tag:hover {
+      background: rgba(74, 144, 226, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .quick-search-tag:active {
+      transform: translateY(0);
     }
 
     #settingsModal {
@@ -244,83 +354,109 @@
       left: 50%;
       transform: translateX(-50%);
       background: white;
-      padding: 1.5rem 2rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
       z-index: 10000;
-      min-width: 300px;
+      min-width: 320px;
       text-align: center;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
+
     #settingsModal.show {
       display: block;
+      animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
     #settingsModal label {
-      font-weight: bold;
-      margin-bottom: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
       display: block;
       color: var(--dark);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
     }
+
     #settingsModal select {
       width: 100%;
-      padding: 0.7rem;
+      padding: 0.9rem;
       font-size: 1rem;
       border-radius: 10px;
       border: 2px solid #e9ecef;
-      margin-bottom: 1.2rem;
-      transition: border-color 0.3s;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s;
+      background: white;
     }
+
     #settingsModal select:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     }
+
     #settingsModal button {
-      padding: 0.7rem 1.5rem;
+      padding: 0.9rem 2rem;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+      width: 100%;
     }
+
     #settingsModal button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+      box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
     }
 
     main {
       max-width: 1200px;
-      margin: 1.5rem auto;
+      margin: 2rem auto;
       padding: 0 1.5rem;
     }
 
     #map {
       height: 500px;
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       overflow: hidden;
       margin-bottom: 2rem;
       position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     /* City weather section */
     #citiesWeatherSection {
       margin-top: 1.5rem;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     #citiesWeatherSection h2 {
       margin-top: 0;
       color: var(--dark);
       border-bottom: 2px solid var(--primary);
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.8rem;
+      font-size: 1.8rem;
     }
 
     #citiesWeatherContainer {
@@ -334,59 +470,70 @@
     #favoritesSection {
       margin-top: 1.5rem;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     #favoritesSection h2 {
       margin-top: 0;
       color: var(--dark);
       border-bottom: 2px solid var(--primary);
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.8rem;
+      font-size: 1.8rem;
     }
 
     #addFavoriteForm {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
       justify-content: center;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     #addFavoriteInput {
       flex-grow: 1;
-      padding: 0.7rem 1.2rem;
-      border-radius: 30px;
-      border: 2px solid #e9ecef;
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      border: 2px solid rgba(240, 173, 78, 0.2);
       font-size: 1rem;
       min-width: 200px;
       transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
     }
     
     #addFavoriteInput:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 3px 15px rgba(240, 173, 78, 0.3);
+      box-shadow: 0 0 0 3px rgba(240, 173, 78, 0.1);
     }
 
     #addFavoriteBtn {
-      padding: 0.7rem 1.5rem;
+      padding: 1rem 2rem;
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       border: none;
-      border-radius: 30px;
+      border-radius: 15px;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      min-width: 150px;
+      min-width: 160px;
       transition: all 0.3s ease;
-      box-shadow: 0 3px 10px rgba(240, 173, 78, 0.3);
+      box-shadow: 0 4px 15px rgba(240, 173, 78, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     #addFavoriteBtn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(240, 173, 78, 0.4);
+      box-shadow: 0 8px 25px rgba(240, 173, 78, 0.4);
     }
 
     #favoritesContainer {
@@ -399,48 +546,53 @@
     .city-weather {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 16px;
-      padding: 1.2rem;
-      width: 220px;
+      padding: 1.5rem;
+      width: 240px;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       cursor: pointer;
       position: relative;
       transition: all 0.3s ease;
       border-top: 4px solid var(--primary);
       backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     .city-weather:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
 
     .city-weather h3 {
       margin-top: 0;
       color: var(--dark);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
     }
 
     .temp {
-      font-size: 1.8rem;
-      font-weight: bold;
+      font-size: 2rem;
+      font-weight: 700;
       color: var(--primary);
-      margin: 0.5rem 0;
+      margin: 0.8rem 0;
     }
 
     .desc {
       font-style: italic;
       color: var(--gray);
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      font-size: 1rem;
     }
     
     .details {
       display: flex;
       justify-content: space-around;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--gray);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+      padding: 0.5rem 0;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
     }
 
     .remove-fav-btn {
@@ -449,98 +601,132 @@
       border: none;
       border-radius: 50%;
       font-size: 14px;
-      width: 26px;
-      height: 26px;
-      line-height: 26px;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
       padding: 0;
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 12px;
+      right: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(217, 83, 79, 0.3);
+      box-shadow: 0 3px 10px rgba(217, 83, 79, 0.3);
     }
+
     .remove-fav-btn:hover {
       transform: scale(1.1);
-      box-shadow: 0 3px 8px rgba(217, 83, 79, 0.4);
+      box-shadow: 0 5px 15px rgba(217, 83, 79, 0.4);
     }
 
     #about {
       margin-top: 2.5rem;
       background: rgba(255, 255, 255, 0.95);
-      padding: 1.8rem;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
     
     #about h2 {
       color: var(--dark);
       border-bottom: 2px solid var(--primary);
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.8rem;
+      font-size: 1.8rem;
+    }
+
+    #about p {
+      font-size: 1.1rem;
+      line-height: 1.7;
     }
 
     footer {
       text-align: center;
-      padding: 1.5rem;
-      font-size: 0.9rem;
+      padding: 2rem;
+      font-size: 1rem;
       color: var(--gray);
-      margin-top: 2rem;
+      margin-top: 3rem;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,0.1);
     }
 
     #feedbackBtn {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 25px;
+      right: 25px;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      padding: 0.8rem 1.5rem;
+      padding: 1rem 2rem;
       border: none;
-      border-radius: 30px;
-      font-weight: bold;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      font-size: 0.95rem;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 9999;
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     #feedbackBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    }
-
-    /* Simple markers instead of banners */
-    .weather-marker {
-      background: rgba(255, 255, 255, 0.95);
-      border: 2px solid var(--primary);
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: var(--primary);
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.4);
     }
 
     @media (max-width: 768px) {
+      header {
+        padding: 1.2rem;
+      }
+      
+      header h1 {
+        font-size: 1.8rem;
+      }
+      
+      header p {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .search-container {
+        padding: 1.2rem;
+        border-radius: 16px;
+      }
+      
+      #searchInput {
+        padding: 1rem 1.2rem 1rem 3rem;
+        font-size: 1rem;
+      }
+      
+      .search-buttons {
+        flex-direction: column;
+      }
+      
+      #searchButton, #gameButton, #settingsBtn {
+        width: 100%;
+      }
+      
+      .quick-search-tags {
+        gap: 0.6rem;
+      }
+      
+      .quick-search-tag {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+      }
+      
       #citiesWeatherContainer,
       #favoritesContainer {
         flex-direction: column;
         align-items: center;
       }
-      #searchForm {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      #searchInput, #searchButton, #gameButton, #addFavoriteInput, #addFavoriteBtn, #settingsBtn {
-        min-width: 100%;
-        border-radius: 30px;
-      }
+      
       .city-weather {
         width: 100%;
-        max-width: 280px;
+        max-width: 300px;
       }
     }
   </style>
@@ -550,12 +736,38 @@
 <header>
   <h1 id="title">MapMyWeather</h1>
   <p id="subtitle">Explore real-time weather worldwide or search any city below</p>
-  <form id="searchForm">
-    <input type="search" id="searchInput" placeholder="Search a city (e.g. London)" required />
-    <button type="submit" id="searchButton">Search</button>
-    <button type="button" id="gameButton" onclick="location.href='game.html'">🎮 Play WeatherGuessr</button>
-    <button type="button" id="settingsBtn">Settings ⚙️</button>
-  </form>
+  
+  <div class="search-container">
+    <form id="searchForm">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="searchInput" placeholder="Search a city (e.g. London, Tokyo, New York)" required />
+      </div>
+      
+      <div class="search-buttons">
+        <button type="submit" id="searchButton">
+          <span>Search Weather</span>
+          <span>🌤️</span>
+        </button>
+        <button type="button" id="gameButton" onclick="location.href='game.html'">
+          <span>🎮 Play WeatherGuessr</span>
+        </button>
+        <button type="button" id="settingsBtn">
+          <span>⚙️ Settings</span>
+        </button>
+      </div>
+      
+      <div class="quick-search-tags">
+        <span class="quick-search-tag" onclick="searchCity('London')">London</span>
+        <span class="quick-search-tag" onclick="searchCity('New York')">New York</span>
+        <span class="quick-search-tag" onclick="searchCity('Tokyo')">Tokyo</span>
+        <span class="quick-search-tag" onclick="searchCity('Paris')">Paris</span>
+        <span class="quick-search-tag" onclick="searchCity('Sydney')">Sydney</span>
+        <span class="quick-search-tag" onclick="searchCity('Dubai')">Dubai</span>
+        <span class="quick-search-tag" onclick="searchCity('Singapore')">Singapore</span>
+      </div>
+    </form>
+  </div>
 </header>
 
 <main>
@@ -574,7 +786,9 @@
     <h2 id="favoritesTitle">Your Favorite Locations</h2>
     <form id="addFavoriteForm">
       <input type="text" id="addFavoriteInput" placeholder="Add a city to favorites" required />
-      <button type="submit" id="addFavoriteBtn">Add to Favorites</button>
+      <button type="submit" id="addFavoriteBtn">
+        <span>⭐ Add to Favorites</span>
+      </button>
     </form>
     <div id="favoritesContainer">
       <!-- Favorite cities weather cards will be rendered here -->
@@ -597,7 +811,7 @@
 
 <!-- Feedback Button -->
 <a id="feedbackBtn" href="https://docs.google.com/forms/d/1Sr-6EWcdBa7Hst9nyJLvTz7oU-eGozoYBpZTMKj7_mU/viewform" target="_blank">
-  Help Us Improve
+  <span>💬 Help Us Improve</span>
 </a>
 
 <!-- Settings Modal -->
@@ -618,7 +832,7 @@
     <option value="de">Deutsch (German)</option>
     <option value="ja">日本語 (Japanese)</option>
   </select>
-  <button id="saveSettingsBtn">Save</button>
+  <button id="saveSettingsBtn">Save Changes</button>
 </div>
 
 <!-- Leaflet JS -->
@@ -627,25 +841,31 @@
 <script>
   const WEATHER_API_KEY = "e110e528cbca47f7ac3104351251407";
 
+  // Quick search function
+  function searchCity(city) {
+    document.getElementById('searchInput').value = city;
+    window.location.href = `weather.html?city=${encodeURIComponent(city)}`;
+  }
+
   // Translations dictionary for UI text
   const translations = {
     en: {
       title: "MapMyWeather",
       subtitle: "Explore real-time weather worldwide or search any city below",
-      searchPlaceholder: "Search a city (e.g. London)",
-      searchButton: "Search",
+      searchPlaceholder: "Search a city (e.g. London, Tokyo, New York)",
+      searchButton: "Search Weather",
       gameButton: "🎮 Play WeatherGuessr",
-      settingsBtn: "Settings ⚙️",
+      settingsBtn: "⚙️ Settings",
       citiesWeatherTitle: "Global Cities Weather",
       favoritesTitle: "Your Favorite Locations",
       addFavoritePlaceholder: "Add a city to favorites",
-      addFavoriteBtn: "Add to Favorites",
+      addFavoriteBtn: "⭐ Add to Favorites",
       aboutTitle: "About MapMyWeather",
       aboutText: "MapMyWeather is an interactive world map showing current weather conditions for major global cities. Click on any marker to learn more about the weather there, or use the search bar to view a detailed forecast. This app is powered by WeatherAPI.com and is entirely free to use.",
-      noFavorites: "No favorite locations yet.",
+      noFavorites: "No favorite locations yet. Add your first city above!",
       removeFavTitle: "Remove from favorites",
       settingsLabel: "Select Language",
-      saveBtn: "Save",
+      saveBtn: "Save Changes",
       humidity: "Humidity",
       wind: "Wind",
       feelsLike: "Feels like",
@@ -654,20 +874,20 @@
     pt: {
       title: "MapMeuTempo",
       subtitle: "Explore o clima em tempo real mundialmente ou pesquise qualquer cidade abaixo",
-      searchPlaceholder: "Pesquise uma cidade (ex: Londres)",
-      searchButton: "Pesquisar",
+      searchPlaceholder: "Pesquise uma cidade (ex: Londres, Tóquio, Nova York)",
+      searchButton: "Pesquisar Clima",
       gameButton: "🎮 Jogar WeatherGuessr",
-      settingsBtn: "Configurações ⚙️",
+      settingsBtn: "⚙️ Configurações",
       citiesWeatherTitle: "Clima das Cidades Globais",
       favoritesTitle: "Seus locais favoritos",
       addFavoritePlaceholder: "Adicione uma cidade aos favoritos",
-      addFavoriteBtn: "Adicionar aos favoritos",
+      addFavoriteBtn: "⭐ Adicionar aos Favoritos",
       aboutTitle: "Sobre o MapMeuTempo",
       aboutText: "MapMeuTempo é um mapa interativo mundial que mostra condições climáticas atuais para as principais cidades globais. Clique em qualquer marcador para saber mais sobre o clima, ou use a barra de pesquisa para ver a previsão detalhada. Este app é alimentado pelo WeatherAPI.com e é totalmente gratuito.",
-      noFavorites: "Nenhum local favorito ainda.",
+      noFavorites: "Nenhum local favorito ainda. Adicione sua primeira cidade acima!",
       removeFavTitle: "Remover dos favoritos",
       settingsLabel: "Selecione o idioma",
-      saveBtn: "Salvar",
+      saveBtn: "Salvar Alterações",
       humidity: "Umidade",
       wind: "Vento",
       feelsLike: "Sensação",
@@ -676,26 +896,25 @@
     es: {
       title: "MapaMiClima",
       subtitle: "Explore el clima en tiempo real en todo el mundo o busque cualquier ciudad a continuación",
-      searchPlaceholder: "Buscar una ciudad (ej: Londres)",
-      searchButton: "Buscar",
+      searchPlaceholder: "Buscar una ciudad (ej: Londres, Tokio, Nueva York)",
+      searchButton: "Buscar Clima",
       gameButton: "🎮 Jugar WeatherGuessr",
-      settingsBtn: "Configuración ⚙️",
+      settingsBtn: "⚙️ Configuración",
       citiesWeatherTitle: "Clima de Ciudades Globales",
       favoritesTitle: "Tus ubicaciones favoritas",
       addFavoritePlaceholder: "Agregar una ciudad a favoritos",
-      addFavoriteBtn: "Agregar a favoritos",
+      addFavoriteBtn: "⭐ Agregar a Favoritos",
       aboutTitle: "Acerca de MapaMiClima",
       aboutText: "MapaMiClima es un mapa mundial interactivo que muestra las condiciones climáticas actuales para las principales ciudades globales. Haga clic en cualquier marcador para obtener más información sobre el clima allí, o use la barra de búsqueda para ver un pronóstico detallado. Esta aplicación funciona con WeatherAPI.com y es completamente gratuita.",
-      noFavorites: "Aún no hay ubicaciones favoritas.",
+      noFavorites: "Aún no hay ubicaciones favoritas. ¡Agrega tu primera ciudad arriba!",
       removeFavTitle: "Eliminar de favoritos",
       settingsLabel: "Seleccionar idioma",
-      saveBtn: "Guardar",
+      saveBtn: "Guardar Cambios",
       humidity: "Humedad",
       wind: "Viento",
       feelsLike: "Sensación térmica",
       lastUpdated: "Actualizado"
     }
-    // Other languages remain the same but shortened for brevity
   };
 
   // Detect or load language from localStorage
@@ -707,17 +926,31 @@
     document.getElementById("title").textContent = t.title;
     document.getElementById("subtitle").textContent = t.subtitle;
     document.getElementById("searchInput").placeholder = t.searchPlaceholder;
-    document.getElementById("searchButton").textContent = t.searchButton;
-    document.getElementById("gameButton").textContent = t.gameButton;
-    document.getElementById("settingsBtn").textContent = t.settingsBtn;
+    document.getElementById("searchButton").innerHTML = `<span>${t.searchButton}</span> <span>🌤️</span>`;
+    document.getElementById("gameButton").innerHTML = `<span>${t.gameButton}</span>`;
+    document.getElementById("settingsBtn").innerHTML = `<span>${t.settingsBtn}</span>`;
     document.getElementById("citiesWeatherTitle").textContent = t.citiesWeatherTitle;
     document.getElementById("favoritesTitle").textContent = t.favoritesTitle;
     document.getElementById("addFavoriteInput").placeholder = t.addFavoritePlaceholder;
-    document.getElementById("addFavoriteBtn").textContent = t.addFavoriteBtn;
+    document.getElementById("addFavoriteBtn").innerHTML = `<span>${t.addFavoriteBtn}</span>`;
     document.getElementById("aboutTitle").textContent = t.aboutTitle;
     document.getElementById("aboutText").textContent = t.aboutText;
     document.getElementById("settingsModalLabel").textContent = t.settingsLabel;
     document.getElementById("saveSettingsBtn").textContent = t.saveBtn;
+    
+    // Update quick search tags based on language
+    updateQuickSearchTags();
+  }
+
+  function updateQuickSearchTags() {
+    const tags = document.querySelectorAll('.quick-search-tag');
+    const cities = ['London', 'New York', 'Tokyo', 'Paris', 'Sydney', 'Dubai', 'Singapore'];
+    cities.forEach((city, index) => {
+      if (tags[index]) {
+        tags[index].textContent = city;
+        tags[index].onclick = () => searchCity(city);
+      }
+    });
   }
 
   applyTranslations();
@@ -744,7 +977,7 @@
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Create simple markers instead of banners to avoid overlapping
+  // Create markers for cities
   cities.forEach(city => {
     const marker = L.marker(city.coords).addTo(map);
     
@@ -754,25 +987,33 @@
       .then(data => {
         const t = translations[lang];
         marker.bindPopup(`
-          <div style="text-align: center; min-width: 150px;">
-            <h3 style="margin: 0 0 8px 0;">${data.location.name}</h3>
-            <div style="font-size: 1.5rem; font-weight: bold; color: #4a90e2; margin: 8px 0;">
+          <div style="text-align: center; min-width: 180px; padding: 10px;">
+            <h3 style="margin: 0 0 10px 0; color: #333; font-size: 1.2rem;">${data.location.name}</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #4a90e2; margin: 10px 0;">
               ${Math.round(data.current.temp_c)}°C
             </div>
-            <div style="font-style: italic; color: #666; margin: 4px 0;">
+            <div style="font-style: italic; color: #666; margin: 8px 0; font-size: 1rem;">
               ${data.current.condition.text}
             </div>
-            <div style="font-size: 0.85rem; color: #888;">
+            <div style="font-size: 0.9rem; color: #888; margin: 5px 0;">
               ${t.feelsLike}: ${Math.round(data.current.feelslike_c)}°C
             </div>
-            <div style="font-size: 0.8rem; color: #999; margin-top: 8px;">
+            <div style="font-size: 0.85rem; color: #999; margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee;">
               ${t.humidity}: ${data.current.humidity}% | ${t.wind}: ${data.current.wind_kph} km/h
             </div>
+            <button onclick="window.location.href='weather.html?city=${encodeURIComponent(city.name)}'" 
+                    style="margin-top: 15px; padding: 8px 16px; background: #4a90e2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+              View Details
+            </button>
           </div>
         `);
       })
       .catch(err => {
-        marker.bindPopup(`<strong>${city.name}</strong><br>Weather data unavailable`);
+        marker.bindPopup(`
+          <div style="text-align: center; min-width: 150px;">
+            <strong>${city.name}</strong><br>Weather data unavailable
+          </div>
+        `);
       });
 
     marker.on("click", () => {
@@ -809,7 +1050,7 @@
           return res.json();
         })
         .then(data => {
-          const updateTime = new Date(data.current.last_updated).toLocaleTimeString();
+          const updateTime = new Date(data.current.last_updated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
           div.innerHTML = `
             <h3>${data.location.name}</h3>
             <div class="temp">${Math.round(data.current.temp_c)}°C</div>
@@ -818,7 +1059,7 @@
               <span>${t.humidity}: ${data.current.humidity}%</span>
               <span>${t.wind}: ${data.current.wind_kph} km/h</span>
             </div>
-            <div style="font-size: 0.7rem; color: #999; margin-top: 8px;">
+            <div style="font-size: 0.75rem; color: #999; margin-top: 10px; font-style: italic;">
               ${t.lastUpdated}: ${updateTime}
             </div>
           `;
@@ -869,6 +1110,10 @@
     if (favorites.length === 0) {
       const noFav = document.createElement("p");
       noFav.textContent = t.noFavorites;
+      noFav.style.textAlign = "center";
+      noFav.style.color = "#666";
+      noFav.style.fontStyle = "italic";
+      noFav.style.padding = "2rem";
       container.appendChild(noFav);
       return;
     }
@@ -942,6 +1187,12 @@
     if (cityName) {
       addFavorite(cityName);
       input.value = "";
+      // Show a success message
+      const originalText = input.placeholder;
+      input.placeholder = `✓ Added "${cityName}" to favorites!`;
+      setTimeout(() => {
+        input.placeholder = originalText;
+      }, 2000);
     }
   });
 
