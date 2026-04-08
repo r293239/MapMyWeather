@@ -212,6 +212,35 @@
     /* Map */
     #map { height: 400px; border-radius: 20px; margin-bottom: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
 
+    /* Custom Marker Styles */
+    .custom-marker {
+      background: none;
+      border: none;
+    }
+    
+    .city-marker {
+      background: var(--primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border: 3px solid white;
+      transition: transform 0.3s;
+    }
+    
+    .city-marker:hover {
+      transform: scale(1.1);
+    }
+    
+    .city-marker span {
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
     /* Cities Grid */
     .cities-grid, .favorites-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin-top: 1rem; }
     .city-card {
@@ -361,6 +390,8 @@
   let weatherChart = null;
   let map = null;
   let currentWeatherData = null;
+  let currentCityMarker = null;
+  let cityMarkers = [];
 
   // Helper Functions
   function formatTemp(tempC) {
@@ -533,7 +564,7 @@
       currentWeatherData = data;
       saveRecentSearch(currentCity);
       updateUI(data);
-      updateMap(data.location.lat, data.location.lon);
+      updateMapMarker(data.location.lat, data.location.lon, data.location.name);
       const hour = new Date(data.current.last_updated).getHours();
       updateBackground(data.current.condition.text, hour);
     } catch (error) {
@@ -604,15 +635,28 @@
     renderFavorites();
   }
 
-  // Map Functions
-  function initMap(lat, lon) {
+  // Map Functions - Updated with proper zoom limits and dynamic markers
+  function initMap(lat, lon, cityName) {
     if (map) map.remove();
-    map = L.map("map").setView([lat, lon], 10);
+    
+    // Create map with zoom limits to prevent over-expanding
+    map = L.map("map").setView([lat, lon], 10, {
+      minZoom: 2,
+      maxZoom: 18,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1.0
+    });
+    
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
+      minZoom: 2,
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
-    L.marker([lat, lon]).addTo(map).bindPopup(`<b>${currentCity}</b><br>📍 Current location`).openPopup();
+    
+    // Add marker for current city
+    addCityMarker(lat, lon, cityName);
+    
+    // Add click event to get weather anywhere on map
     map.on('click', async (e) => {
       try {
         const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${e.latlng.lat},${e.latlng.lng}`);
@@ -624,9 +668,79 @@
     });
   }
 
-  function updateMap(lat, lon) {
-    if (map) map.setView([lat, lon], 10);
-    else initMap(lat, lon);
+  function addCityMarker(lat, lon, cityName) {
+    // Remove existing marker if any
+    if (currentCityMarker) {
+      map.removeLayer(currentCityMarker);
+    }
+    
+    // Create custom marker div
+    const markerHtml = `
+      <div class="city-marker">
+        <span>📍</span>
+      </div>
+    `;
+    
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: markerHtml,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
+    });
+    
+    currentCityMarker = L.marker([lat, lon], { icon: customIcon }).addTo(map);
+    currentCityMarker.bindPopup(`
+      <div style="text-align: center;">
+        <strong>${cityName}</strong><br>
+        Current location
+      </div>
+    `).openPopup();
+  }
+
+  function updateMapMarker(lat, lon, cityName) {
+    if (map) {
+      map.setView([lat, lon], 10);
+      addCityMarker(lat, lon, cityName);
+    } else {
+      initMap(lat, lon, cityName);
+    }
+  }
+
+  // Global Cities Markers (static markers that stay on map)
+  function addGlobalCityMarkers() {
+    // Clear existing global markers
+    cityMarkers.forEach(marker => {
+      if (map) map.removeLayer(marker);
+    });
+    cityMarkers = [];
+    
+    const globalCities = [
+      { name: "New York", coords: [40.7128, -74.0060] },
+      { name: "London", coords: [51.5074, -0.1278] },
+      { name: "Tokyo", coords: [35.6762, 139.6503] },
+      { name: "Singapore", coords: [1.3521, 103.8198] },
+      { name: "Paris", coords: [48.8566, 2.3522] },
+      { name: "Sydney", coords: [-33.8688, 151.2093] },
+      { name: "Dubai", coords: [25.276987, 55.296249] }
+    ];
+    
+    globalCities.forEach(city => {
+      const marker = L.marker(city.coords).addTo(map);
+      marker.bindPopup(`
+        <div style="text-align: center;">
+          <strong>${city.name}</strong><br>
+          <button onclick="searchCity('${city.name}')" style="margin-top: 5px; padding: 5px 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            View Weather
+          </button>
+        </div>
+      `);
+      cityMarkers.push(marker);
+      
+      marker.on('click', () => {
+        searchCity(city.name);
+      });
+    });
   }
 
   // Cities Grid - Extended list
