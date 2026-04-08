@@ -160,6 +160,7 @@
     }
 
     .location-btn { background: linear-gradient(135deg, var(--success), #218838); }
+    .game-btn { background: linear-gradient(135deg, var(--secondary), #e64a19); }
     .quick-tags, .recent-searches { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
     .tag, .recent-item {
       padding: 0.3rem 0.8rem;
@@ -300,6 +301,7 @@
     </div>
     <button id="searchBtn">🔍 Search</button>
     <button id="locationBtn" class="location-btn">📍 My Location</button>
+    <button id="gameBtn" class="game-btn" onclick="window.location.href='game.html'">🎮 Play WeatherGuessr</button>
   </div>
   <div class="quick-tags" id="quickTags"></div>
   <div class="recent-searches" id="recentSearches"></div>
@@ -339,6 +341,7 @@
       <li>⭐ Save and manage favorite cities</li>
       <li>📍 Auto-detect your location</li>
       <li>📈 Temperature and rain trend charts</li>
+      <li>🎮 Play WeatherGuessr - Test your weather knowledge!</li>
     </ul>
     <p style="margin-top: 1rem;">Powered by <strong>WeatherAPI.com</strong> | Free and open source</p>
   </div>
