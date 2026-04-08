@@ -154,9 +154,14 @@
       transition: all 0.3s;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .location-btn { background: linear-gradient(135deg, var(--success), #218838); }
@@ -199,6 +204,13 @@
       border-radius: 12px;
       margin-bottom: 1rem;
       animation: pulse 2s infinite;
+    }
+    .location-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
 
@@ -368,7 +380,7 @@
       <li>🧠 Smart weather insights and recommendations</li>
       <li>🗺️ Interactive map with click-to-weather</li>
       <li>⭐ Save and manage favorite cities</li>
-      <li>📍 Auto-detect your location</li>
+      <li>📍 Auto-detect your location with HIGH ACCURACY GPS</li>
       <li>📈 Temperature and rain trend charts</li>
       <li>🎮 Play WeatherGuessr - Test your weather knowledge!</li>
     </ul>
@@ -445,6 +457,142 @@
 
   function showError(message) {
     document.getElementById("currentWeather").innerHTML = `<div class="error-message">❌ ${message}</div>`;
+  }
+
+  function showTemporaryMessage(message, isSuccess = true) {
+    const alertDiv = document.getElementById("rainAlert");
+    const className = isSuccess ? "location-success" : "rain-alert";
+    const tempHtml = `<div class="${className}">${message}</div>`;
+    alertDiv.innerHTML = tempHtml;
+    setTimeout(() => {
+      if (alertDiv.innerHTML === tempHtml) alertDiv.innerHTML = "";
+    }, 5000);
+  }
+
+  // Fallback: Get approximate location by IP
+  async function getLocationByIP() {
+    showTemporaryMessage("📍 Using approximate location (IP-based)...", false);
+    try {
+      const res = await fetch(`https://api.weatherapi.com/v1/ip.json?key=${WEATHER_API_KEY}&q=auto:ip`);
+      const data = await res.json();
+      if (data.city) {
+        showTemporaryMessage(`⚠️ Approximate location: ${data.city}, ${data.country}. For better accuracy, allow GPS access.`, false);
+        searchCity(data.city);
+      } else {
+        throw new Error("No city found");
+      }
+    } catch (err) {
+      showError("Could not detect your location. Please search for a city manually.");
+    }
+  }
+
+  // IMPROVED: High Accuracy Geolocation
+  function getUserLocation() {
+    if (!("geolocation" in navigator)) {
+      if (confirm("Geolocation not supported by your browser. Use IP-based approximate location instead?")) {
+        getLocationByIP();
+      } else {
+        showError("Geolocation not supported. Please search manually.");
+      }
+      return;
+    }
+    
+    const locationBtn = document.getElementById("locationBtn");
+    const originalText = locationBtn.innerHTML;
+    locationBtn.innerHTML = "📍 Getting precise location...";
+    locationBtn.disabled = true;
+    
+    // Options for maximum accuracy
+    const options = {
+      enableHighAccuracy: true,      // Use GPS if available
+      timeout: 15000,                // 15 seconds max
+      maximumAge: 0                  // Don't use cached position
+    };
+    
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        // Success - we have coordinates
+        const { latitude, longitude, accuracy } = pos.coords;
+        
+        // Show accuracy feedback
+        let accuracyMsg = "";
+        let accuracyClass = "";
+        if (accuracy < 50) {
+          accuracyMsg = `🎯 Excellent accuracy (within ${Math.round(accuracy)} meters)`;
+          accuracyClass = "location-success";
+        } else if (accuracy < 200) {
+          accuracyMsg = `📍 Good accuracy (within ${Math.round(accuracy)} meters)`;
+          accuracyClass = "location-success";
+        } else if (accuracy < 1000) {
+          accuracyMsg = `⚠️ Low accuracy (within ${Math.round(accuracy)} meters) - try moving outdoors for better GPS`;
+          accuracyClass = "rain-alert";
+        } else {
+          accuracyMsg = `⚠️ Very low accuracy (within ${Math.round(accuracy)} meters) - using approximate location`;
+          accuracyClass = "rain-alert";
+        }
+        
+        try {
+          // Reverse geocode with WeatherAPI
+          const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${latitude},${longitude}`);
+          const data = await res.json();
+          
+          if (data.location) {
+            // Show accuracy message
+            const alertDiv = document.getElementById("rainAlert");
+            const tempHtml = `<div class="${accuracyClass}">${accuracyMsg}<br>📍 Showing weather for: ${data.location.name}, ${data.location.country}</div>`;
+            alertDiv.innerHTML = tempHtml;
+            setTimeout(() => {
+              if (alertDiv.innerHTML === tempHtml) alertDiv.innerHTML = "";
+            }, 6000);
+            
+            searchCity(data.location.name);
+          } else {
+            throw new Error("No location data");
+          }
+        } catch (err) {
+          showError("Could not get weather for your precise location. Try IP fallback?");
+          if (confirm("GPS location failed. Use approximate IP-based location instead?")) {
+            getLocationByIP();
+          }
+        } finally {
+          locationBtn.innerHTML = originalText;
+          locationBtn.disabled = false;
+        }
+      },
+      (error) => {
+        // Handle different error types
+        locationBtn.innerHTML = originalText;
+        locationBtn.disabled = false;
+        
+        let errorMsg = "";
+        let useIPFallback = false;
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMsg = "Location access denied. Enable location in browser settings for accurate weather, or use IP fallback.";
+            useIPFallback = true;
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMsg = "GPS signal unavailable. Move to an open area with better signal, or use IP fallback.";
+            useIPFallback = true;
+            break;
+          case error.TIMEOUT:
+            errorMsg = "Location request timed out. GPS taking too long. Use IP fallback?";
+            useIPFallback = true;
+            break;
+          default:
+            errorMsg = "Unknown error getting your location.";
+            useIPFallback = true;
+        }
+        
+        if (useIPFallback && confirm(`${errorMsg}\n\nUse approximate IP-based location instead?`)) {
+          getLocationByIP();
+        } else if (!useIPFallback) {
+          showError(errorMsg);
+        }
+      },
+      options  // Pass the high-accuracy options
+    );
   }
 
   // Weather Insights
@@ -635,11 +783,10 @@
     renderFavorites();
   }
 
-  // Map Functions - Updated with proper zoom limits and dynamic markers
+  // Map Functions
   function initMap(lat, lon, cityName) {
     if (map) map.remove();
     
-    // Create map with zoom limits to prevent over-expanding
     map = L.map("map").setView([lat, lon], 10, {
       minZoom: 2,
       maxZoom: 18,
@@ -653,10 +800,9 @@
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
     
-    // Add marker for current city
     addCityMarker(lat, lon, cityName);
+    addGlobalCityMarkers();
     
-    // Add click event to get weather anywhere on map
     map.on('click', async (e) => {
       try {
         const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${e.latlng.lat},${e.latlng.lng}`);
@@ -669,18 +815,11 @@
   }
 
   function addCityMarker(lat, lon, cityName) {
-    // Remove existing marker if any
     if (currentCityMarker) {
       map.removeLayer(currentCityMarker);
     }
     
-    // Create custom marker div
-    const markerHtml = `
-      <div class="city-marker">
-        <span>📍</span>
-      </div>
-    `;
-    
+    const markerHtml = `<div class="city-marker"><span>📍</span></div>`;
     const customIcon = L.divIcon({
       className: 'custom-marker',
       html: markerHtml,
@@ -690,12 +829,7 @@
     });
     
     currentCityMarker = L.marker([lat, lon], { icon: customIcon }).addTo(map);
-    currentCityMarker.bindPopup(`
-      <div style="text-align: center;">
-        <strong>${cityName}</strong><br>
-        Current location
-      </div>
-    `).openPopup();
+    currentCityMarker.bindPopup(`<div style="text-align: center;"><strong>${cityName}</strong><br>Current location</div>`).openPopup();
   }
 
   function updateMapMarker(lat, lon, cityName) {
@@ -707,9 +841,7 @@
     }
   }
 
-  // Global Cities Markers (static markers that stay on map)
   function addGlobalCityMarkers() {
-    // Clear existing global markers
     cityMarkers.forEach(marker => {
       if (map) map.removeLayer(marker);
     });
@@ -727,23 +859,13 @@
     
     globalCities.forEach(city => {
       const marker = L.marker(city.coords).addTo(map);
-      marker.bindPopup(`
-        <div style="text-align: center;">
-          <strong>${city.name}</strong><br>
-          <button onclick="searchCity('${city.name}')" style="margin-top: 5px; padding: 5px 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            View Weather
-          </button>
-        </div>
-      `);
+      marker.bindPopup(`<div style="text-align: center;"><strong>${city.name}</strong><br><button onclick="searchCity('${city.name}')" style="margin-top: 5px; padding: 5px 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer;">View Weather</button></div>`);
       cityMarkers.push(marker);
-      
-      marker.on('click', () => {
-        searchCity(city.name);
-      });
+      marker.on('click', () => searchCity(city.name));
     });
   }
 
-  // Cities Grid - Extended list
+  // Cities Grid
   const citiesList = [
     "New York", "London", "Tokyo", "Singapore", "Paris", "Sydney", "Dubai", 
     "Toronto", "Rio de Janeiro", "Cape Town", "Moscow", "Istanbul", "Los Angeles", 
@@ -812,7 +934,6 @@
       favs.push(city); 
       saveFavorites(favs); 
       renderFavorites();
-      // Show success feedback
       const btn = document.getElementById("addFavoriteBtn");
       const originalText = btn.innerHTML;
       btn.innerHTML = "✓ Added!";
@@ -832,29 +953,6 @@
     document.getElementById("searchInput").value = city;
     fetchWeather(city);
   };
-
-  // Geolocation
-  function getUserLocation() {
-    if ("geolocation" in navigator) {
-      const locationBtn = document.getElementById("locationBtn");
-      const originalText = locationBtn.innerHTML;
-      locationBtn.innerHTML = "📍 Getting location...";
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${pos.coords.latitude},${pos.coords.longitude}`);
-          const data = await res.json();
-          locationBtn.innerHTML = originalText;
-          searchCity(data.location.name);
-        } catch (err) {
-          locationBtn.innerHTML = originalText;
-          showError("Could not get weather for your location");
-        }
-      }, () => {
-        locationBtn.innerHTML = originalText;
-        showError("Location access denied. Please search manually.");
-      });
-    } else showError("Geolocation not supported by your browser");
-  }
 
   // Unit Toggle
   document.querySelectorAll(".unit-btn").forEach(btn => {
